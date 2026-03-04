@@ -1,11 +1,7 @@
 package com.resume.dashboard.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +14,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(JwtUtil.class);
 
     @Value("${app.jwt.secret}")
     private String secret;
@@ -30,49 +27,63 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email, String role, String userId) {
+    /**
+     * Generate access token
+     * Subject = phone (primary identity)
+     */
+    public String generateToken(String username, String userId) {
+
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
+
         return Jwts.builder()
-                .setSubject(email)
-                .claim("role", role)
+                .setSubject(username)
                 .claim("userId", userId)
+                .claim("type", "ACCESS")
+                .setIssuer("resume-dashboard")
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(getSigningKey())
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String getEmailFromToken(String token) {
-        return getClaimsFromToken(token).getSubject();
+    public String getUserIdFromToken(String token) {
+        return getClaims(token).get("userId", String.class);
     }
 
-    public String getRoleFromToken(String token) {
-        Object roleObj = getClaimsFromToken(token).get("role");
-        if (roleObj instanceof String) {
-            return (String) roleObj;
-        }
-        return roleObj != null ? roleObj.toString() : "ROLE_USER";
-    }
-
-    private Claims getClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public String getUsernameFromToken(String token) {
+        return getClaims(token).getSubject();
     }
 
     public boolean validateToken(String token) {
+
         try {
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
+
             return true;
-        } catch (ExpiredJwtException | MalformedJwtException | SignatureException e) {
-            log.debug("Invalid JWT: {}", e.getMessage());
-            return false;
+
+        } catch (ExpiredJwtException ex) {
+            log.warn("JWT expired: {}", ex.getMessage());
+        } catch (MalformedJwtException ex) {
+            log.warn("Malformed JWT: {}", ex.getMessage());
+        } catch (SignatureException ex) {
+            log.warn("Invalid JWT signature: {}", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            log.warn("JWT token compact of handler are invalid: {}",
+                    ex.getMessage());
         }
+
+        return false;
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

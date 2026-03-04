@@ -5,81 +5,97 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-
 @Document(collection = "users")
 public class User {
 
     @Id
     private String id;
+
     @Indexed(unique = true)
-    private String email;
+    private String username;   // THIS IS YOUR PUBLIC URL
+
+    @Indexed(unique = true, sparse = true)
+    private String phoneNumber;
+
     private String password;
+
     @Indexed
     private String role; // ROLE_USER, ROLE_ADMIN
+
     private UserStatus status;
+
     private Instant createdAt;
+    private Instant lastLogin;
 
     public enum UserStatus {
-        ACTIVE, BLOCKED
+        ACTIVE,
+        BLOCKED
     }
 
-    public User() {
-    }
+	public String getId() {
+		return id;
+	}
 
-    public User(String id, String email, String password, String role, UserStatus status, Instant createdAt) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.status = status;
-        this.createdAt = createdAt;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public String getRole() {
-        return role;
-    }
+	public String getRole() {
+		return role;
+	}
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+	public void setRole(String role) {
+		this.role = role;
+	}
 
-    public UserStatus getStatus() {
-        return status;
-    }
+	public UserStatus getStatus() {
+		return status;
+	}
 
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
+	public void setStatus(UserStatus status) {
+		this.status = status;
+	}
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setCreatedAt(Instant createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Instant getLastLogin() {
+		return lastLogin;
+	}
+
+	public void setLastLogin(Instant lastLogin) {
+		this.lastLogin = lastLogin;
+	}
+    
 }
+
+

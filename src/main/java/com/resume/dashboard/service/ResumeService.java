@@ -1,302 +1,248 @@
 package com.resume.dashboard.service;
 
-import com.resume.dashboard.dto.resume.ResumeRequest;
-import com.resume.dashboard.dto.resume.ResumeResponse;
-import com.resume.dashboard.dto.resume.ResumeVersionResponse;
-import com.resume.dashboard.entity.Resume;
-import com.resume.dashboard.entity.ResumeVersion;
-import com.resume.dashboard.exception.InvalidStateTransitionException;
-import com.resume.dashboard.exception.ResourceNotFoundException;
-import com.resume.dashboard.exception.UnauthorizedActionException;
-import com.resume.dashboard.exception.UserBlockedException;
-import com.resume.dashboard.repository.ResumeRepository;
-import com.resume.dashboard.repository.ResumeVersionRepository;
-import com.resume.dashboard.repository.UserRepository;
-import com.resume.dashboard.util.AuditService;
-import com.resume.dashboard.util.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.resume.dashboard.dto.resume.CreateResumeRequest;
+import com.resume.dashboard.entity.*;
+import com.resume.dashboard.exception.ResourceNotFoundException;
+import com.resume.dashboard.repository.*;
 
 @Service
 public class ResumeService {
 
-    private static final Logger log = LoggerFactory.getLogger(ResumeService.class);
-
     private final ResumeRepository resumeRepository;
-    private final ResumeVersionRepository versionRepository;
+    private final SubscriptionService subscriptionService;
+    private final TemplateRepository templateRepository;
+    private final LayoutRepository layoutRepository;
+    private final ThemeRepository themeRepository;
+    private final ResumeVersionService resumeVersionService;
     private final UserRepository userRepository;
-    private final AuditService auditService;
+    private final PortfolioSectionConfigService sectionService;
 
-    @Autowired
-    public ResumeService(ResumeRepository resumeRepository, ResumeVersionRepository versionRepository,
-                         UserRepository userRepository, AuditService auditService) {
+    public ResumeService(
+            ResumeRepository resumeRepository,
+            SubscriptionService subscriptionService,
+            TemplateRepository templateRepository,
+            LayoutRepository layoutRepository,
+            ThemeRepository themeRepository,
+            ResumeVersionService resumeVersionService,
+            UserRepository userRepository,
+            PortfolioSectionConfigService sectionService) {
+
         this.resumeRepository = resumeRepository;
-        this.versionRepository = versionRepository;
+        this.subscriptionService = subscriptionService;
+        this.templateRepository = templateRepository;
+        this.layoutRepository = layoutRepository;
+        this.themeRepository = themeRepository;
+        this.resumeVersionService = resumeVersionService;
         this.userRepository = userRepository;
-        this.auditService = auditService;
+        this.sectionService = sectionService;
     }
 
-    private void ensureUserNotBlocked(String email) {
-        userRepository.findByEmail(email).ifPresent(u -> {
-            if (u.getStatus() == com.resume.dashboard.entity.User.UserStatus.BLOCKED) {
-                throw new UserBlockedException("Account is blocked");
-            }
-        });
-    }
+    /* =========================================================
+       CREATE RESUME
+    ========================================================= */
+    @Transactional
+    public Resume createResume(String userId, CreateResumeRequest request) {
 
-    public ResumeResponse create(ResumeRequest req) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        ensureUserNotBlocked(email);
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        long existingCount = resumeRepository.countByUserId(userId);
+
+        // 🔥 enforce resume limit
+        subscriptionService.validateResumeCreation(userId, existingCount);
+
+        // 🔥 enforce template gating
+        if (!subscriptionService.isTemplateAllowed(userId, request.getTemplateId())) {
+            throw new IllegalStateException("Your subscription plan does not allow this template");
+        }
+
+        Template template = templateRepository
+                .findByIdAndActiveTrue(request.getTemplateId())
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found"));
+
+        Layout layout = layoutRepository.findById(template.getLayoutId())
+                .orElseThrow(() -> new ResourceNotFoundException("Layout not found"));
+
+        String themeId = request.getThemeOverrideId() != null
+                ? request.getThemeOverrideId()
+                : template.getDefaultThemeId();
+
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
 
         Resume resume = new Resume();
-        resume.setId(UUID.randomUUID().toString());
-        resume.setUserId(user.getId());
-        resume.setTitle(req.getTitle());
-        resume.setState(Resume.ResumeState.DRAFT);
-        resume.setActiveVersion(1);
+        resume.setUserId(userId);
+        resume.setTitle(request.getTitle().trim());
+        resume.setProfessionType(request.getProfessionType());
+
+        resume.setTemplateId(template.getId());
+        resume.setTemplateVersion(template.getVersion());
+        resume.setLayoutId(layout.getId());
+        resume.setLayoutVersion(layout.getVersion());
+        resume.setThemeId(theme.getId());
+        resume.setThemeVersion(theme.getVersion());
+
+        resume.setVisibility(VisibilityType.PRIVATE);
+        resume.setPublished(false);
+        resume.setApprovalStatus(ApprovalStatus.DRAFT);
+        resume.setVersion(1);
+        resume.setViewCount(0L);
+
         resume.setCreatedAt(Instant.now());
         resume.setUpdatedAt(Instant.now());
-        resume = resumeRepository.save(resume);
 
-        ResumeVersion v = createVersion(resume.getId(), 1, req);
-        versionRepository.save(v);
+        Resume saved = resumeRepository.save(resume);
 
-        auditService.log("CREATE_RESUME", "RESUME", resume.getId(), new HashMap<>());
-        return toResponse(resume, v.getContent());
+        sectionService.initializeDefaultSections(saved.getId());
+
+        return saved;
     }
 
-    public ResumeResponse update(String id, ResumeRequest req) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        ensureUserNotBlocked(email);
-        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-        if (!resume.getUserId().equals(userRepository.findByEmail(email).get().getId())) {
-            throw new UnauthorizedActionException("Not your resume");
-        }
-        if (resume.getState() != Resume.ResumeState.DRAFT) {
-            throw new InvalidStateTransitionException("Can only edit resumes in DRAFT state");
+    /* =========================================================
+       PUBLISH RESUME
+    ========================================================= */
+    @Transactional
+    public Resume publishResume(String userId, String resumeId) {
+
+        Resume resume = getOwnedResume(userId, resumeId);
+
+        if (resume.getApprovalStatus() != ApprovalStatus.APPROVED) {
+            throw new IllegalStateException("Resume must be approved before publishing");
         }
 
-        int newVer = resume.getActiveVersion() + 1;
-        resume.setActiveVersion(newVer);
-        resume.setTitle(req.getTitle());
+        // 🔥 check active subscription
+        if (!subscriptionService.isSubscriptionActive(userId)) {
+            throw new IllegalStateException("Your subscription is inactive or expired");
+        }
+
+        long publishedCount =
+                resumeRepository.countByUserIdAndPublishedTrue(userId);
+
+        // 🔥 enforce public link limit
+        subscriptionService.validatePublicPublish(userId, publishedCount);
+
+        resumeVersionService.createVersion(
+                userId,
+                resumeId,
+                "Auto snapshot on admin approval publish"
+        );
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        String baseSlug = user.getUsername().toLowerCase();
+        String finalSlug;
+
+        if (publishedCount == 0) {
+            finalSlug = baseSlug;
+        } else {
+            finalSlug = baseSlug + "-v" + (publishedCount + 1);
+        }
+
+        int counter = (int) publishedCount + 1;
+        while (resumeRepository.existsBySlug(finalSlug)) {
+            counter++;
+            finalSlug = baseSlug + "-v" + counter;
+        }
+
+        resume.setSlug(finalSlug);
+        resume.setPublished(true);
+        resume.setVisibility(VisibilityType.PUBLIC);
         resume.setUpdatedAt(Instant.now());
-        resume = resumeRepository.save(resume);
 
-        ResumeVersion v = createVersion(resume.getId(), newVer, req);
-        versionRepository.save(v);
-
-        auditService.log("UPDATE_RESUME", "RESUME", resume.getId(), new HashMap<>());
-        return toResponse(resume, v.getContent());
+        return resumeRepository.save(resume);
     }
 
-    public ResumeResponse submit(String id) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        ensureUserNotBlocked(email);
-        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-        if (!resume.getUserId().equals(userRepository.findByEmail(email).get().getId())) {
-            throw new UnauthorizedActionException("Not your resume");
-        }
-        if (resume.getState() != Resume.ResumeState.DRAFT) {
-            throw new InvalidStateTransitionException("Can only submit DRAFT resumes");
-        }
+    /* =========================================================
+       OTHER METHODS UNCHANGED
+    ========================================================= */
 
-        resume.setState(Resume.ResumeState.SUBMITTED);
+    public Resume updateMeta(String userId, String resumeId, String title, String profession) {
+
+        Resume resume = getOwnedResume(userId, resumeId);
+        resume.setTitle(title);
+        resume.setProfessionType(profession);
         resume.setUpdatedAt(Instant.now());
-        resume = resumeRepository.save(resume);
 
-        ResumeVersion v = versionRepository.findByResumeIdAndVersion(resume.getId(), resume.getActiveVersion())
-                .orElseThrow(() -> new ResourceNotFoundException("Version not found"));
-        auditService.log("SUBMIT_RESUME", "RESUME", resume.getId(), new HashMap<>());
-        return toResponse(resume, v.getContent());
+        return resumeRepository.save(resume);
     }
 
-    public List<ResumeResponse> getMyResumes() {
-        String email = SecurityUtils.getCurrentUserEmail();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        List<Resume> list = resumeRepository.findByUserIdOrderByUpdatedAtDesc(user.getId());
-        List<ResumeResponse> result = new ArrayList<>();
-        for (Resume r : list) {
-            var v = versionRepository.findByResumeIdAndVersion(r.getId(), r.getActiveVersion());
-            result.add(toResponse(r, v.map(ResumeVersion::getContent).orElse(null)));
-        }
-        return result;
+    public Resume changeTheme(String userId, String resumeId, String newThemeId) {
+
+        Resume resume = getOwnedResume(userId, resumeId);
+
+        Theme theme = themeRepository.findById(newThemeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
+
+        resume.setThemeId(theme.getId());
+        resume.setThemeVersion(theme.getVersion());
+        resume.setUpdatedAt(Instant.now());
+
+        return resumeRepository.save(resume);
     }
 
-    public ResumeResponse getById(String id) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-        if (!resume.getUserId().equals(userRepository.findByEmail(email).get().getId())) {
-            throw new UnauthorizedActionException("Not your resume");
+    public Resume submitForApproval(String userId, String resumeId) {
+
+        Resume resume = getOwnedResume(userId, resumeId);
+
+        if (resume.getApprovalStatus() != ApprovalStatus.DRAFT) {
+            throw new IllegalStateException("Only draft resumes can be submitted");
         }
-        var v = versionRepository.findByResumeIdAndVersion(resume.getId(), resume.getActiveVersion())
-                .orElseThrow(() -> new ResourceNotFoundException("Version not found"));
-        return toResponse(resume, v.getContent());
+
+        resume.setApprovalStatus(ApprovalStatus.PENDING);
+        resume.setUpdatedAt(Instant.now());
+
+        return resumeRepository.save(resume);
     }
 
-    public List<ResumeVersionResponse> getVersions(String id) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        Resume resume = resumeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-        if (!resume.getUserId().equals(userRepository.findByEmail(email).get().getId())) {
-            throw new UnauthorizedActionException("Not your resume");
-        }
-        return versionRepository.findByResumeIdOrderByVersionDesc(resume.getId()).stream()
-                .map(this::toVersionResponse)
-                .collect(Collectors.toList());
+    public Resume unpublishResume(String userId, String resumeId) {
+
+        Resume resume = getOwnedResume(userId, resumeId);
+        resume.setPublished(false);
+        resume.setVisibility(VisibilityType.PRIVATE);
+        resume.setUpdatedAt(Instant.now());
+
+        return resumeRepository.save(resume);
     }
 
-    private ResumeVersion createVersion(String resumeId, int version, ResumeRequest req) {
-        ResumeVersion rv = new ResumeVersion();
-        rv.setId(UUID.randomUUID().toString());
-        rv.setResumeId(resumeId);
-        rv.setVersion(version);
-        rv.setContent(mapContent(req));
-        rv.setCreatedAt(Instant.now());
-        return rv;
+    public Resume getByIdForOwner(String userId, String resumeId) {
+        return getOwnedResume(userId, resumeId);
     }
 
-    private ResumeVersion.ResumeContent mapContent(ResumeRequest req) {
-        ResumeVersion.ResumeContent c = new ResumeVersion.ResumeContent();
-        if (req.getPersonalInfo() != null) {
-            ResumeVersion.PersonalInfo pi = new ResumeVersion.PersonalInfo();
-            pi.setFullName(req.getPersonalInfo().getFullName());
-            pi.setTitle(req.getPersonalInfo().getTitle());
-            pi.setEmail(req.getPersonalInfo().getEmail());
-            pi.setPhone(req.getPersonalInfo().getPhone());
-            pi.setLocation(req.getPersonalInfo().getLocation());
-            c.setPersonalInfo(pi);
-        }
-        c.setSummary(req.getSummary());
-        if (req.getExperience() != null) {
-            c.setExperience(req.getExperience().stream().map(e -> {
-                ResumeVersion.Experience ex = new ResumeVersion.Experience();
-                ex.setCompany(e.getCompany());
-                ex.setRole(e.getRole());
-                ex.setDuration(e.getDuration());
-                ex.setDescription(e.getDescription());
-                return ex;
-            }).collect(Collectors.toList()));
-        }
-        if (req.getEducation() != null) {
-            c.setEducation(req.getEducation().stream().map(e -> {
-                ResumeVersion.Education ed = new ResumeVersion.Education();
-                ed.setInstitution(e.getInstitution());
-                ed.setDegree(e.getDegree());
-                ed.setYear(e.getYear());
-                return ed;
-            }).collect(Collectors.toList()));
-        }
-        c.setSkills(req.getSkills());
-        if (req.getProjects() != null) {
-            c.setProjects(req.getProjects().stream().map(p -> {
-                ResumeVersion.Project pr = new ResumeVersion.Project();
-                pr.setName(p.getName());
-                pr.setDescription(p.getDescription());
-                pr.setLink(p.getLink());
-                return pr;
-            }).collect(Collectors.toList()));
-        }
-        if (req.getLinks() != null) {
-            ResumeVersion.Links ln = new ResumeVersion.Links();
-            ln.setGithub(req.getLinks().getGithub());
-            ln.setLinkedin(req.getLinks().getLinkedin());
-            ln.setPortfolio(req.getLinks().getPortfolio());
-            c.setLinks(ln);
-        }
-        return c;
+    public Resume getPublicBySlug(String slug) {
+
+        Resume resume = resumeRepository.findBySlugAndPublishedTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
+
+        incrementViewCount(resume);
+        return resume;
     }
 
-    private ResumeResponse.ResumeContentResponse mapContentResponse(ResumeVersion.ResumeContent content) {
-        if (content == null) return null;
-        ResumeResponse.ResumeContentResponse cr = new ResumeResponse.ResumeContentResponse();
-        if (content.getPersonalInfo() != null) {
-            ResumeRequest.PersonalInfoDto d = new ResumeRequest.PersonalInfoDto();
-            d.setFullName(content.getPersonalInfo().getFullName());
-            d.setTitle(content.getPersonalInfo().getTitle());
-            d.setEmail(content.getPersonalInfo().getEmail());
-            d.setPhone(content.getPersonalInfo().getPhone());
-            d.setLocation(content.getPersonalInfo().getLocation());
-            cr.setPersonalInfo(d);
-        }
-        cr.setSummary(content.getSummary());
-        if (content.getExperience() != null) {
-            cr.setExperience(content.getExperience().stream().map(e -> {
-                ResumeRequest.ExperienceDto d = new ResumeRequest.ExperienceDto();
-                d.setCompany(e.getCompany());
-                d.setRole(e.getRole());
-                d.setDuration(e.getDuration());
-                d.setDescription(e.getDescription());
-                return d;
-            }).collect(Collectors.toList()));
-        }
-        if (content.getEducation() != null) {
-            cr.setEducation(content.getEducation().stream().map(e -> {
-                ResumeRequest.EducationDto d = new ResumeRequest.EducationDto();
-                d.setInstitution(e.getInstitution());
-                d.setDegree(e.getDegree());
-                d.setYear(e.getYear());
-                return d;
-            }).collect(Collectors.toList()));
-        }
-        cr.setSkills(content.getSkills());
-        if (content.getProjects() != null) {
-            cr.setProjects(content.getProjects().stream().map(p -> {
-                ResumeRequest.ProjectDto d = new ResumeRequest.ProjectDto();
-                d.setName(p.getName());
-                d.setDescription(p.getDescription());
-                d.setLink(p.getLink());
-                return d;
-            }).collect(Collectors.toList()));
-        }
-        if (content.getLinks() != null) {
-            ResumeRequest.LinksDto ln = new ResumeRequest.LinksDto();
-            ln.setGithub(content.getLinks().getGithub());
-            ln.setLinkedin(content.getLinks().getLinkedin());
-            ln.setPortfolio(content.getLinks().getPortfolio());
-            cr.setLinks(ln);
-        }
-        return cr;
+    public void deleteResume(String userId, String resumeId) {
+
+        Resume resume = getOwnedResume(userId, resumeId);
+        resumeRepository.delete(resume);
     }
 
-    public ResumeResponse toResponse(Resume r, ResumeVersion.ResumeContent content) {
-        ResumeResponse res = new ResumeResponse();
-        res.setId(r.getId());
-        res.setUserId(r.getUserId());
-        res.setTitle(r.getTitle());
-        res.setState(r.getState().name());
-        res.setActiveVersion(r.getActiveVersion());
-        res.setCreatedAt(r.getCreatedAt());
-        res.setUpdatedAt(r.getUpdatedAt());
-        res.setContent(mapContentResponse(content));
-        return res;
+    private Resume getOwnedResume(String userId, String resumeId) {
+
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
+
+        if (!resume.getUserId().equals(userId)) {
+            throw new IllegalStateException("Unauthorized access");
+        }
+
+        return resume;
     }
 
-    private ResumeVersionResponse toVersionResponse(ResumeVersion v) {
-        ResumeVersionResponse r = new ResumeVersionResponse();
-        r.setId(v.getId());
-        r.setResumeId(v.getResumeId());
-        r.setVersion(v.getVersion());
-        r.setContent(mapContentResponse(v.getContent()));
-        r.setCreatedAt(v.getCreatedAt());
-        return r;
-    }
-
-    public Resume getResumeEntity(String id) {
-        return resumeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-    }
-
-    public ResumeVersion getActiveVersion(String resumeId) {
-        Resume r = resumeRepository.findById(resumeId).orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-        return versionRepository.findByResumeIdAndVersion(resumeId, r.getActiveVersion())
-                .orElseThrow(() -> new ResourceNotFoundException("Version not found"));
+    private void incrementViewCount(Resume resume) {
+        resume.setViewCount(resume.getViewCount() + 1);
+        resumeRepository.save(resume);
     }
 }

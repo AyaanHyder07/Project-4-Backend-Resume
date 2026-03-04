@@ -4,48 +4,63 @@ public class AuthResponse {
 
     private String token;
     private String role;
-    private String email;
+    private String username;   // replaced email
+    private String phoneNumber;
     private String userId;
 
-    public AuthResponse() {
-    }
+    public AuthResponse() {}
 
-    public AuthResponse(String token, String role, String email, String userId) {
+    public AuthResponse(String token,
+                        String role,
+                        String username,
+                        String phoneNumber,
+                        String userId) {
         this.token = token;
         this.role = role;
-        this.email = email;
+        this.username = username;
+        this.phoneNumber = phoneNumber;
         this.userId = userId;
     }
 
-    public String getToken() {
-        return token;
-    }
+	public String getToken() {
+		return token;
+	}
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+	public void setToken(String token) {
+		this.token = token;
+	}
 
-    public String getRole() {
-        return role;
-    }
+	public String getRole() {
+		return role;
+	}
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+	public void setRole(String role) {
+		this.role = role;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public String getUserId() {
-        return userId;
-    }
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+    // getters and setters
 }

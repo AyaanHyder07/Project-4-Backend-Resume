@@ -1,178 +1,147 @@
 package com.resume.dashboard.entity;
 
+import java.time.Instant;
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
-import java.util.List;
-
 @Document(collection = "resume_versions")
-@CompoundIndex(name = "resume_version_idx", def = "{'resumeId': 1, 'version': 1}", unique = true)
 public class ResumeVersion {
 
     @Id
     private String id;
+
+    @Indexed
     private String resumeId;
-    private int version;
-    private ResumeContent content;
+
+    @Indexed
+    private String userId;
+
+    private boolean current;   // 🔥 ADD THIS
+
+    private Map<String, Object> snapshotContent;
+
+    private String templateId;
+    private int templateVersion;
+
+    private String layoutId;
+    private int layoutVersion;
+
+    private String themeId;
+    private int themeVersion;
+
+    private String changeNote;
+
     private Instant createdAt;
 
-    public ResumeVersion() {
-    }
+    // getters + setters
 
-    public ResumeVersion(String id, String resumeId, int version, ResumeContent content, Instant createdAt) {
-        this.id = id;
-        this.resumeId = resumeId;
-        this.version = version;
-        this.content = content;
-        this.createdAt = createdAt;
-    }
 
-    public String getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public boolean isCurrent() {
+		return current;
+	}
 
-    public String getResumeId() {
-        return resumeId;
-    }
+	public void setCurrent(boolean current) {
+		this.current = current;
+	}
 
-    public void setResumeId(String resumeId) {
-        this.resumeId = resumeId;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public int getVersion() {
-        return version;
-    }
+	public String getResumeId() {
+		return resumeId;
+	}
 
-    public void setVersion(int version) {
-        this.version = version;
-    }
+	public void setResumeId(String resumeId) {
+		this.resumeId = resumeId;
+	}
 
-    public ResumeContent getContent() {
-        return content;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public void setContent(ResumeContent content) {
-        this.content = content;
-    }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
 
-    public static class ResumeContent {
-        private PersonalInfo personalInfo;
-        private String summary;
-        private List<Experience> experience;
-        private List<Education> education;
-        private List<String> skills;
-        private List<Project> projects;
-        private Links links;
+	public Map<String, Object> getSnapshotContent() {
+		return snapshotContent;
+	}
 
-        public ResumeContent() {
-        }
+	public void setSnapshotContent(Map<String, Object> snapshotContent) {
+		this.snapshotContent = snapshotContent;
+	}
 
-        public PersonalInfo getPersonalInfo() { return personalInfo; }
-        public void setPersonalInfo(PersonalInfo personalInfo) { this.personalInfo = personalInfo; }
-        public String getSummary() { return summary; }
-        public void setSummary(String summary) { this.summary = summary; }
-        public List<Experience> getExperience() { return experience; }
-        public void setExperience(List<Experience> experience) { this.experience = experience; }
-        public List<Education> getEducation() { return education; }
-        public void setEducation(List<Education> education) { this.education = education; }
-        public List<String> getSkills() { return skills; }
-        public void setSkills(List<String> skills) { this.skills = skills; }
-        public List<Project> getProjects() { return projects; }
-        public void setProjects(List<Project> projects) { this.projects = projects; }
-        public Links getLinks() { return links; }
-        public void setLinks(Links links) { this.links = links; }
-    }
+	public String getTemplateId() {
+		return templateId;
+	}
 
-    public static class PersonalInfo {
-        private String fullName;
-        private String title;
-        private String email;
-        private String phone;
-        private String location;
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
 
-        public PersonalInfo() { }
-        public String getFullName() { return fullName; }
-        public void setFullName(String fullName) { this.fullName = fullName; }
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPhone() { return phone; }
-        public void setPhone(String phone) { this.phone = phone; }
-        public String getLocation() { return location; }
-        public void setLocation(String location) { this.location = location; }
-    }
+	public int getTemplateVersion() {
+		return templateVersion;
+	}
 
-    public static class Experience {
-        private String company;
-        private String role;
-        private String duration;
-        private String description;
+	public void setTemplateVersion(int templateVersion) {
+		this.templateVersion = templateVersion;
+	}
 
-        public Experience() { }
-        public String getCompany() { return company; }
-        public void setCompany(String company) { this.company = company; }
-        public String getRole() { return role; }
-        public void setRole(String role) { this.role = role; }
-        public String getDuration() { return duration; }
-        public void setDuration(String duration) { this.duration = duration; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-    }
+	public String getLayoutId() {
+		return layoutId;
+	}
 
-    public static class Education {
-        private String institution;
-        private String degree;
-        private String year;
+	public void setLayoutId(String layoutId) {
+		this.layoutId = layoutId;
+	}
 
-        public Education() { }
-        public String getInstitution() { return institution; }
-        public void setInstitution(String institution) { this.institution = institution; }
-        public String getDegree() { return degree; }
-        public void setDegree(String degree) { this.degree = degree; }
-        public String getYear() { return year; }
-        public void setYear(String year) { this.year = year; }
-    }
+	public int getLayoutVersion() {
+		return layoutVersion;
+	}
 
-    public static class Project {
-        private String name;
-        private String description;
-        private String link;
+	public void setLayoutVersion(int layoutVersion) {
+		this.layoutVersion = layoutVersion;
+	}
 
-        public Project() { }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        public String getLink() { return link; }
-        public void setLink(String link) { this.link = link; }
-    }
+	public String getThemeId() {
+		return themeId;
+	}
 
-    public static class Links {
-        private String github;
-        private String linkedin;
-        private String portfolio;
+	public void setThemeId(String themeId) {
+		this.themeId = themeId;
+	}
 
-        public Links() { }
-        public String getGithub() { return github; }
-        public void setGithub(String github) { this.github = github; }
-        public String getLinkedin() { return linkedin; }
-        public void setLinkedin(String linkedin) { this.linkedin = linkedin; }
-        public String getPortfolio() { return portfolio; }
-        public void setPortfolio(String portfolio) { this.portfolio = portfolio; }
-    }
+	public int getThemeVersion() {
+		return themeVersion;
+	}
+
+	public void setThemeVersion(int themeVersion) {
+		this.themeVersion = themeVersion;
+	}
+
+	public String getChangeNote() {
+		return changeNote;
+	}
+
+	public void setChangeNote(String changeNote) {
+		this.changeNote = changeNote;
+	}
+
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Instant createdAt) {
+		this.createdAt = createdAt;
+	}
 }

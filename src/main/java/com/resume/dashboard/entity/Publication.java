@@ -1,0 +1,138 @@
+package com.resume.dashboard.entity;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+
+@Document(collection = "publications")
+@CompoundIndex(def = "{'resumeId': 1, 'displayOrder': 1}")
+public class Publication {
+
+    @Id
+    private String id;
+
+    @Indexed
+    private String resumeId;
+
+    private String title;
+
+    @Indexed
+    private PublicationType type;
+
+    private String publisher;
+
+    private LocalDate publicationDate;
+
+    private String abstractText; // FIXED naming
+
+    private String contentUrl;
+
+    private List<String> keywords;
+
+    private int displayOrder;
+
+    private Instant createdAt;
+
+    private Instant updatedAt;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getResumeId() {
+		return resumeId;
+	}
+
+	public void setResumeId(String resumeId) {
+		this.resumeId = resumeId;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public PublicationType getType() {
+		return type;
+	}
+
+	public void setType(PublicationType type) {
+		this.type = type;
+	}
+
+	public String getPublisher() {
+		return publisher;
+	}
+
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
+	}
+
+	public LocalDate getPublicationDate() {
+		return publicationDate;
+	}
+
+	public void setPublicationDate(LocalDate publicationDate) {
+		this.publicationDate = publicationDate;
+	}
+
+	public String getAbstractText() {
+		return abstractText;
+	}
+
+	public void setAbstractText(String abstractText) {
+		this.abstractText = abstractText;
+	}
+
+	public String getContentUrl() {
+		return contentUrl;
+	}
+
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
+	}
+
+	public List<String> getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(List<String> keywords) {
+		this.keywords = keywords;
+	}
+
+	public int getDisplayOrder() {
+		return displayOrder;
+	}
+
+	public void setDisplayOrder(int displayOrder) {
+		this.displayOrder = displayOrder;
+	}
+
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Instant createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Instant getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Instant updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+}

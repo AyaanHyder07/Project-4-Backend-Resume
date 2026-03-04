@@ -1,16 +1,12 @@
 package com.resume.dashboard.controller;
 
-import com.resume.dashboard.dto.resume.ResumeRequest;
-import com.resume.dashboard.dto.resume.ResumeResponse;
-import com.resume.dashboard.dto.resume.ResumeVersionResponse;
+import com.resume.dashboard.dto.resume.CreateResumeRequest;
+import com.resume.dashboard.entity.Resume;
 import com.resume.dashboard.service.ResumeService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/resumes")
@@ -18,44 +14,124 @@ public class ResumeController {
 
     private final ResumeService resumeService;
 
-    @Autowired
     public ResumeController(ResumeService resumeService) {
         this.resumeService = resumeService;
     }
 
+    /* =========================================================
+       CREATE RESUME (DRAFT)
+    ========================================================= */
     @PostMapping
-    public ResponseEntity<ResumeResponse> create(@Valid @RequestBody ResumeRequest req) {
-        ResumeResponse res = resumeService.create(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    public ResponseEntity<Resume> createResume(
+            @AuthenticationPrincipal String userId,
+            @Valid @RequestBody CreateResumeRequest request) {
+
+        return ResponseEntity.ok(
+                resumeService.createResume(userId, request)
+        );
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ResumeResponse> update(@PathVariable String id, @Valid @RequestBody ResumeRequest req) {
-        ResumeResponse res = resumeService.update(id, req);
-        return ResponseEntity.ok(res);
+    /* =========================================================
+       UPDATE BASIC META
+    ========================================================= */
+    @PutMapping("/{resumeId}/meta")
+    public ResponseEntity<Resume> updateMeta(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId,
+            @RequestParam String title,
+            @RequestParam String profession) {
+
+        return ResponseEntity.ok(
+                resumeService.updateMeta(userId, resumeId, title, profession)
+        );
     }
 
-    @PutMapping("/{id}/submit")
-    public ResponseEntity<ResumeResponse> submit(@PathVariable String id) {
-        ResumeResponse res = resumeService.submit(id);
-        return ResponseEntity.ok(res);
+    /* =========================================================
+       CHANGE THEME
+    ========================================================= */
+    @PutMapping("/{resumeId}/theme")
+    public ResponseEntity<Resume> changeTheme(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId,
+            @RequestParam String themeId) {
+
+        return ResponseEntity.ok(
+                resumeService.changeTheme(userId, resumeId, themeId)
+        );
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<List<ResumeResponse>> getMyResumes() {
-        List<ResumeResponse> list = resumeService.getMyResumes();
-        return ResponseEntity.ok(list);
+    /* =========================================================
+       SUBMIT FOR APPROVAL
+    ========================================================= */
+    @PutMapping("/{resumeId}/submit")
+    public ResponseEntity<Resume> submit(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId) {
+
+        return ResponseEntity.ok(
+                resumeService.submitForApproval(userId, resumeId)
+        );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResumeResponse> getById(@PathVariable String id) {
-        ResumeResponse res = resumeService.getById(id);
-        return ResponseEntity.ok(res);
+    /* =========================================================
+       PUBLISH (Slug assigned here)
+    ========================================================= */
+    @PutMapping("/{resumeId}/publish")
+    public ResponseEntity<Resume> publish(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId) {
+
+        return ResponseEntity.ok(
+                resumeService.publishResume(userId, resumeId)
+        );
     }
 
-    @GetMapping("/{id}/versions")
-    public ResponseEntity<List<ResumeVersionResponse>> getVersions(@PathVariable String id) {
-        List<ResumeVersionResponse> list = resumeService.getVersions(id);
-        return ResponseEntity.ok(list);
+    /* =========================================================
+       UNPUBLISH
+    ========================================================= */
+    @PutMapping("/{resumeId}/unpublish")
+    public ResponseEntity<Resume> unpublish(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId) {
+
+        return ResponseEntity.ok(
+                resumeService.unpublishResume(userId, resumeId)
+        );
+    }
+
+    /* =========================================================
+       DELETE
+    ========================================================= */
+    @DeleteMapping("/{resumeId}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId) {
+
+        resumeService.deleteResume(userId, resumeId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /* =========================================================
+       GET OWNER RESUME
+    ========================================================= */
+    @GetMapping("/{resumeId}")
+    public ResponseEntity<Resume> getOwnerResume(
+            @AuthenticationPrincipal String userId,
+            @PathVariable String resumeId) {
+
+        return ResponseEntity.ok(
+                resumeService.getByIdForOwner(userId, resumeId)
+        );
+    }
+
+    /* =========================================================
+       PUBLIC FETCH (NO AUTH)
+    ========================================================= */
+    @GetMapping("/public/{slug}")
+    public ResponseEntity<Resume> getPublic(@PathVariable String slug) {
+
+        return ResponseEntity.ok(
+                resumeService.getPublicBySlug(slug)
+        );
     }
 }

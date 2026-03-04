@@ -1,7 +1,6 @@
 package com.resume.dashboard.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -13,26 +12,36 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtAuthEntryPoint.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(JwtAuthEntryPoint.class);
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException, ServletException {
-        log.error("Unauthorized: {}", authException.getMessage());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException ex) throws IOException {
+
+        log.warn("Unauthorized access to {} - {}",
+                request.getRequestURI(),
+                ex.getMessage());
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", Instant.now().toString());
-        body.put("status", 401);
-        body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage());
-        body.put("path", request.getRequestURI());
-        new ObjectMapper().writeValue(response.getOutputStream(), body);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        Map<String, Object> body = Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", 401,
+                "error", "Unauthorized",
+                "message", "Authentication required or invalid token",
+                "path", request.getRequestURI()
+        );
+
+        objectMapper.writeValue(response.getOutputStream(), body);
     }
 }
