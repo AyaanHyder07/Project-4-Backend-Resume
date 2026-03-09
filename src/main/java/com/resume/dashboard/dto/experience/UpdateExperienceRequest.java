@@ -20,9 +20,9 @@ public class UpdateExperienceRequest {
     private String location;
 
     @NotNull
-    private LocalDate startDate;
+    private String startDate;
 
-    private LocalDate endDate;
+    private String endDate;
 
     private Boolean currentlyWorking;
 
@@ -64,19 +64,19 @@ public class UpdateExperienceRequest {
 		this.location = location;
 	}
 
-	public LocalDate getStartDate() {
+	public String getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(LocalDate startDate) {
+	public void setStartDate(String startDate) {
 		this.startDate = startDate;
 	}
 
-	public LocalDate getEndDate() {
+	public String getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(LocalDate endDate) {
+	public void setEndDate(String endDate) {
 		this.endDate = endDate;
 	}
 

@@ -73,6 +73,7 @@ public class DashboardResponse {
 
     private int profileCompletionPercentage;
     private List<ResumeSummaryDTO> resumes;
+    private List<ResumeSummaryDTO> recentResumes;
 
 	public String getCurrentPlan() {
 		return currentPlan;
@@ -144,6 +145,14 @@ public class DashboardResponse {
 
 	public void setResumes(List<ResumeSummaryDTO> resumes) {
 		this.resumes = resumes;
+	}
+
+	public List<ResumeSummaryDTO> getRecentResumes() {
+		return recentResumes;
+	}
+
+	public void setRecentResumes(List<ResumeSummaryDTO> recentResumes) {
+		this.recentResumes = recentResumes;
 	}
 
     // getters setters

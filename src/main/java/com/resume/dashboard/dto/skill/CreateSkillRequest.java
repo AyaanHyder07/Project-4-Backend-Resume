@@ -19,7 +19,7 @@ public class CreateSkillRequest {
 
     private SkillProficiency proficiency;
 
-    private int yearsOfExperience;
+    private Integer yearsOfExperience;
 
     private boolean featured;
 

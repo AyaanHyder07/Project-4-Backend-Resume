@@ -13,7 +13,7 @@ public class UpdateUserProfileRequest {
     private String bio;
     private String detailedBio;
 
-    private LocalDate dateOfBirth;
+    private String dateOfBirth;
     private String gender;
     private String nationality;
     private String location;
@@ -86,11 +86,11 @@ public class UpdateUserProfileRequest {
 		this.detailedBio = detailedBio;
 	}
 
-	public LocalDate getDateOfBirth() {
+	public String getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(LocalDate dateOfBirth) {
+	public void setDateOfBirth(String dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 

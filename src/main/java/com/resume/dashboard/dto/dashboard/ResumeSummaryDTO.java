@@ -2,6 +2,7 @@ package com.resume.dashboard.dto.dashboard;
 
 import com.resume.dashboard.entity.ApprovalStatus;
 import com.resume.dashboard.entity.VisibilityType;
+import java.time.Instant;
 
 public class ResumeSummaryDTO {
 
@@ -14,6 +15,7 @@ public class ResumeSummaryDTO {
     private ApprovalStatus approvalStatus;
 
     private long viewCount;
+    private Instant updatedAt;
 
 	public String getId() {
 		return id;
@@ -69,6 +71,14 @@ public class ResumeSummaryDTO {
 
 	public void setViewCount(long viewCount) {
 		this.viewCount = viewCount;
+	}
+
+	public Instant getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Instant updatedAt) {
+		this.updatedAt = updatedAt;
 	}
 
     // getters setters

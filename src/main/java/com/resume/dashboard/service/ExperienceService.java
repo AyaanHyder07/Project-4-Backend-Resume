@@ -34,10 +34,11 @@ public class ExperienceService {
         Resume resume = resumeRepo.findById(request.getResumeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
+        LocalDate start = LocalDate.parse(request.getStartDate());
+        LocalDate end = request.getEndDate() != null ? LocalDate.parse(request.getEndDate()) : null;
+
         validateOwnership(resume, userId);
-        validateDates(request.getStartDate(),
-                      request.getEndDate(),
-                      request.getCurrentlyWorking());
+        validateDates(start, end, request.getCurrentlyWorking());
 
         EmploymentType type =
                 EmploymentType.valueOf(request.getEmploymentType().toUpperCase());
@@ -58,8 +59,8 @@ public class ExperienceService {
         exp.setEmploymentType(type);
         exp.setRoleTitle(request.getRoleTitle());
         exp.setLocation(request.getLocation());
-        exp.setStartDate(request.getStartDate());
-        exp.setEndDate(request.getCurrentlyWorking() ? null : request.getEndDate());
+        exp.setStartDate(start);
+        exp.setEndDate(end);
         exp.setCurrentlyWorking(Boolean.TRUE.equals(request.getCurrentlyWorking()));
         exp.setRoleDescription(request.getRoleDescription());
         exp.setKeyAchievements(request.getKeyAchievements());
@@ -84,10 +85,11 @@ public class ExperienceService {
         Resume resume = resumeRepo.findById(exp.getResumeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
+        LocalDate start = LocalDate.parse(request.getStartDate());
+        LocalDate end = request.getEndDate() != null ? LocalDate.parse(request.getEndDate()) : null;
+
         validateOwnership(resume, userId);
-        validateDates(request.getStartDate(),
-                      request.getEndDate(),
-                      request.getCurrentlyWorking());
+        validateDates(start, end, request.getCurrentlyWorking());
 
         exp.setOrganizationName(request.getOrganizationName());
         exp.setEmploymentType(
@@ -95,8 +97,8 @@ public class ExperienceService {
         );
         exp.setRoleTitle(request.getRoleTitle());
         exp.setLocation(request.getLocation());
-        exp.setStartDate(request.getStartDate());
-        exp.setEndDate(request.getCurrentlyWorking() ? null : request.getEndDate());
+        exp.setStartDate(start);
+        exp.setEndDate(end);
         exp.setCurrentlyWorking(Boolean.TRUE.equals(request.getCurrentlyWorking()));
         exp.setRoleDescription(request.getRoleDescription());
         exp.setKeyAchievements(request.getKeyAchievements());

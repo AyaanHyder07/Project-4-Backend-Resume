@@ -1,6 +1,10 @@
 package com.resume.dashboard.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@SuppressWarnings("deprecation")
 public class JwtUtil {
 
     private static final Logger log =
@@ -43,7 +48,7 @@ public class JwtUtil {
                 .setIssuer("resume-dashboard")
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -58,10 +63,10 @@ public class JwtUtil {
     public boolean validateToken(String token) {
 
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token);
 
             return true;
 
@@ -80,10 +85,10 @@ public class JwtUtil {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

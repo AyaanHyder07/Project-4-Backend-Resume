@@ -1,0 +1,24 @@
+package com.resume.dashboard.entity;
+
+/**
+ * Persona/industry tags for layout and theme targeting.
+ * A layout or theme can belong to MULTIPLE audiences.
+ */
+public enum LayoutAudience {
+    // Creative
+    ARTIST, PHOTOGRAPHER, ILLUSTRATOR, GRAPHIC_DESIGNER, FASHION_DESIGNER,
+    MUSICIAN, SINGER, DANCER, ACTOR, FILMMAKER, POET, WRITER, JOURNALIST,
+
+    // Tech
+    SOFTWARE_ENGINEER, DATA_SCIENTIST, PRODUCT_MANAGER, UX_DESIGNER, GAME_DEVELOPER,
+
+    // Professional
+    DOCTOR, NURSE, THERAPIST, LAWYER, POLITICIAN, ACADEMIC, RESEARCHER,
+    FINANCIAL_ANALYST, ACCOUNTANT, CONSULTANT, ARCHITECT, ENGINEER,
+
+    // Business & Personal Brand
+    ENTREPRENEUR, FOUNDER, COACH, SPEAKER, INFLUENCER, RECRUITER,
+
+    // General
+    STUDENT, FRESH_GRADUATE, EXECUTIVE, FREELANCER
+}

@@ -1,9 +1,11 @@
 package com.resume.dashboard.entity;
 
-import java.time.Instant;
-
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
+import java.util.List;
 
 @Document(collection = "layouts")
 public class Layout {
@@ -11,17 +13,30 @@ public class Layout {
     @Id
     private String id;
 
+    @Indexed(unique = true)
     private String name;
+
+    private String description;
 
     private LayoutType layoutType;
 
-    private String layoutConfigJson; 
-    // JSON: columns, section order, sidebar rules etc
+    // ─── Classification ─────────────────────────────────────────────
+    private List<LayoutAudience> targetAudiences;  // e.g. [ARTIST, PHOTOGRAPHER]
+    private List<VisualMood> compatibleMoods;       // moods this layout suits
+    private List<String> professionTags;            // free-text: "musician", "surgeon"
 
+    // ─── Structure Config ────────────────────────────────────────────
+    private LayoutStructureConfig structureConfig;
+
+    // ─── Plan gating ────────────────────────────────────────────────
+    private PlanType requiredPlan;
+
+    // ─── Admin-defined preview ──────────────────────────────────────
+    private String previewImageUrl;
+
+    // ─── Status ─────────────────────────────────────────────────────
     private boolean active;
-
     private int version;
-
     private Instant createdAt;
     private Instant updatedAt;
 	public String getId() {
@@ -36,17 +51,53 @@ public class Layout {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
 	public LayoutType getLayoutType() {
 		return layoutType;
 	}
 	public void setLayoutType(LayoutType layoutType) {
 		this.layoutType = layoutType;
 	}
-	public String getLayoutConfigJson() {
-		return layoutConfigJson;
+	public List<LayoutAudience> getTargetAudiences() {
+		return targetAudiences;
 	}
-	public void setLayoutConfigJson(String layoutConfigJson) {
-		this.layoutConfigJson = layoutConfigJson;
+	public void setTargetAudiences(List<LayoutAudience> targetAudiences) {
+		this.targetAudiences = targetAudiences;
+	}
+	public List<VisualMood> getCompatibleMoods() {
+		return compatibleMoods;
+	}
+	public void setCompatibleMoods(List<VisualMood> compatibleMoods) {
+		this.compatibleMoods = compatibleMoods;
+	}
+	public List<String> getProfessionTags() {
+		return professionTags;
+	}
+	public void setProfessionTags(List<String> professionTags) {
+		this.professionTags = professionTags;
+	}
+	public LayoutStructureConfig getStructureConfig() {
+		return structureConfig;
+	}
+	public void setStructureConfig(LayoutStructureConfig structureConfig) {
+		this.structureConfig = structureConfig;
+	}
+	public PlanType getRequiredPlan() {
+		return requiredPlan;
+	}
+	public void setRequiredPlan(PlanType requiredPlan) {
+		this.requiredPlan = requiredPlan;
+	}
+	public String getPreviewImageUrl() {
+		return previewImageUrl;
+	}
+	public void setPreviewImageUrl(String previewImageUrl) {
+		this.previewImageUrl = previewImageUrl;
 	}
 	public boolean isActive() {
 		return active;
@@ -72,4 +123,6 @@ public class Layout {
 	public void setUpdatedAt(Instant updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+    
+    
 }

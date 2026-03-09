@@ -1,12 +1,9 @@
 package com.resume.dashboard.service;
 
 import com.resume.dashboard.dto.template.*;
-import com.resume.dashboard.entity.Template;
-import com.resume.dashboard.entity.PlanType;
+import com.resume.dashboard.entity.*;
 import com.resume.dashboard.exception.ResourceNotFoundException;
-import com.resume.dashboard.repository.TemplateRepository;
-import com.resume.dashboard.repository.LayoutRepository;
-import com.resume.dashboard.repository.ThemeRepository;
+import com.resume.dashboard.repository.*;
 
 import org.springframework.stereotype.Service;
 
@@ -30,20 +27,18 @@ public class TemplateService {
         this.themeRepository = themeRepository;
     }
 
-    /*
-     * CREATE TEMPLATE
-     */
+    // ─── CREATE ─────────────────────────────────────────────────────
     public TemplateResponse create(CreateTemplateRequest request) {
 
         if (templateRepository.existsByNameIgnoreCase(request.getName())) {
             throw new IllegalStateException("Template with this name already exists");
         }
 
-        // Validate layout
+        // Validate referenced layout exists
         layoutRepository.findById(request.getLayoutId())
                 .orElseThrow(() -> new ResourceNotFoundException("Layout not found"));
 
-        // Validate theme
+        // Validate referenced theme exists
         themeRepository.findById(request.getDefaultThemeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
 
@@ -51,14 +46,21 @@ public class TemplateService {
         template.setId(UUID.randomUUID().toString());
         template.setName(request.getName());
         template.setDescription(request.getDescription());
+        template.setTagline(request.getTagline());
         template.setPreviewImageUrl(request.getPreviewImageUrl());
+        template.setPreviewVideoUrl(request.getPreviewVideoUrl());
         template.setPlanLevel(request.getPlanLevel());
-        template.setActive(true);
         template.setLayoutId(request.getLayoutId());
         template.setDefaultThemeId(request.getDefaultThemeId());
+        template.setTargetAudiences(request.getTargetAudiences());
         template.setProfessionTags(request.getProfessionTags());
+        template.setPrimaryMood(request.getPrimaryMood());
         template.setSupportedSections(request.getSupportedSections());
+        template.setRequiredSections(request.getRequiredSections());
         template.setFeatured(Boolean.TRUE.equals(request.getFeatured()));
+        template.setNew(Boolean.TRUE.equals(request.getIsNew()));
+        template.setPopularityScore(0);
+        template.setActive(true);
         template.setVersion(1);
         template.setCreatedAt(Instant.now());
         template.setUpdatedAt(Instant.now());
@@ -66,9 +68,7 @@ public class TemplateService {
         return map(templateRepository.save(template));
     }
 
-    /*
-     * UPDATE TEMPLATE
-     */
+    // ─── UPDATE ─────────────────────────────────────────────────────
     public TemplateResponse update(String id, UpdateTemplateRequest request) {
 
         Template template = templateRepository.findById(id)
@@ -82,8 +82,14 @@ public class TemplateService {
         if (request.getDescription() != null)
             template.setDescription(request.getDescription());
 
+        if (request.getTagline() != null)
+            template.setTagline(request.getTagline());
+
         if (request.getPreviewImageUrl() != null)
             template.setPreviewImageUrl(request.getPreviewImageUrl());
+
+        if (request.getPreviewVideoUrl() != null)
+            template.setPreviewVideoUrl(request.getPreviewVideoUrl());
 
         if (request.getPlanLevel() != null)
             template.setPlanLevel(request.getPlanLevel());
@@ -102,13 +108,22 @@ public class TemplateService {
             structuralChange = true;
         }
 
+        if (request.getTargetAudiences() != null)
+            template.setTargetAudiences(request.getTargetAudiences());
+
         if (request.getProfessionTags() != null)
             template.setProfessionTags(request.getProfessionTags());
+
+        if (request.getPrimaryMood() != null)
+            template.setPrimaryMood(request.getPrimaryMood());
 
         if (request.getSupportedSections() != null) {
             template.setSupportedSections(request.getSupportedSections());
             structuralChange = true;
         }
+
+        if (request.getRequiredSections() != null)
+            template.setRequiredSections(request.getRequiredSections());
 
         if (request.getActive() != null)
             template.setActive(request.getActive());
@@ -116,20 +131,18 @@ public class TemplateService {
         if (request.getFeatured() != null)
             template.setFeatured(request.getFeatured());
 
-        if (structuralChange) {
+        if (request.getIsNew() != null)
+            template.setNew(request.getIsNew());
+
+        if (structuralChange)
             template.setVersion(template.getVersion() + 1);
-        }
 
         template.setUpdatedAt(Instant.now());
-
         return map(templateRepository.save(template));
     }
 
-    /*
-     * GET AVAILABLE TEMPLATES FOR USER PLAN
-     */
+    // ─── GET AVAILABLE FOR PLAN ──────────────────────────────────────
     public List<TemplateResponse> getAvailableTemplates(PlanType userPlan) {
-
         return templateRepository.findByActiveTrue()
                 .stream()
                 .filter(t -> userPlan.ordinal() >= t.getPlanLevel().ordinal())
@@ -137,11 +150,8 @@ public class TemplateService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * GET BY PROFESSION
-     */
+    // ─── GET BY PROFESSION TAG ───────────────────────────────────────
     public List<TemplateResponse> getByProfession(String profession, PlanType userPlan) {
-
         return templateRepository
                 .findByProfessionTagsContainingAndActiveTrue(profession)
                 .stream()
@@ -150,26 +160,69 @@ public class TemplateService {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * MAPPER
-     */
-    private TemplateResponse map(Template t) {
+    // ─── GET BY AUDIENCE ─────────────────────────────────────────────
+    public List<TemplateResponse> getByAudience(LayoutAudience audience, PlanType userPlan) {
+        return templateRepository
+                .findByTargetAudiencesContainingAndActiveTrue(audience)
+                .stream()
+                .filter(t -> userPlan.ordinal() >= t.getPlanLevel().ordinal())
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
 
+    // ─── GET BY MOOD ─────────────────────────────────────────────────
+    public List<TemplateResponse> getByMood(VisualMood mood, PlanType userPlan) {
+        return templateRepository
+                .findByPrimaryMoodAndActiveTrue(mood)
+                .stream()
+                .filter(t -> userPlan.ordinal() >= t.getPlanLevel().ordinal())
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+
+    // ─── SOFT DELETE ─────────────────────────────────────────────────
+    public void deactivate(String id) {
+        Template template = templateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found"));
+        template.setActive(false);
+        template.setUpdatedAt(Instant.now());
+        templateRepository.save(template);
+    }
+
+    // ─── MAPPER ──────────────────────────────────────────────────────
+    private TemplateResponse map(Template t) {
         TemplateResponse r = new TemplateResponse();
         r.setId(t.getId());
         r.setName(t.getName());
         r.setDescription(t.getDescription());
+        r.setTagline(t.getTagline());
         r.setPreviewImageUrl(t.getPreviewImageUrl());
+        r.setPreviewVideoUrl(t.getPreviewVideoUrl());
         r.setPlanLevel(t.getPlanLevel());
-        r.setActive(t.isActive());
-        r.setProfessionTags(t.getProfessionTags());
         r.setLayoutId(t.getLayoutId());
         r.setDefaultThemeId(t.getDefaultThemeId());
+        r.setTargetAudiences(t.getTargetAudiences());
+        r.setProfessionTags(t.getProfessionTags());
+        r.setPrimaryMood(t.getPrimaryMood());
         r.setSupportedSections(t.getSupportedSections());
-        r.setVersion(t.getVersion());
+        r.setRequiredSections(t.getRequiredSections());
+        r.setActive(t.isActive());
         r.setFeatured(t.isFeatured());
+        r.setNew(t.isNew());
+        r.setPopularityScore(t.getPopularityScore());
+        r.setVersion(t.getVersion());
         r.setCreatedAt(t.getCreatedAt());
         r.setUpdatedAt(t.getUpdatedAt());
         return r;
+    }
+    // ─── GET ACTIVE BY ID ────────────────────────────────────────────
+    /**
+     * Admin-safe single template lookup by ID.
+     * Used by admin GET /api/admin/templates/{id} and user GET /api/templates/{id}.
+     * No plan filter — plan check is done in the controller for user endpoint.
+     */
+    public TemplateResponse getActiveById(String id) {
+        return map(templateRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found: " + id)));
     }
 }

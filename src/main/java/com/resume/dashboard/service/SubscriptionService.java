@@ -2,8 +2,10 @@ package com.resume.dashboard.service;
 
 import com.resume.dashboard.entity.PlanType;
 import com.resume.dashboard.entity.Subscription;
+import com.resume.dashboard.entity.SubscriptionPlan;
 import com.resume.dashboard.entity.Template;
 import com.resume.dashboard.exception.ResourceNotFoundException;
+import com.resume.dashboard.repository.SubscriptionPlanRepository;
 import com.resume.dashboard.repository.SubscriptionRepository;
 import com.resume.dashboard.repository.TemplateRepository;
 
@@ -16,11 +18,14 @@ import java.util.UUID;
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository; // ✅ reads limits from DB
     private final TemplateRepository templateRepository;
 
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
+                               SubscriptionPlanRepository subscriptionPlanRepository,
                                TemplateRepository templateRepository) {
         this.subscriptionRepository = subscriptionRepository;
+        this.subscriptionPlanRepository = subscriptionPlanRepository;
         this.templateRepository = templateRepository;
     }
 
@@ -31,39 +36,27 @@ public class SubscriptionService {
 
         Subscription sub = subscriptionRepository
                 .findByUserIdAndActiveTrue(userId)
-                .orElseGet(() -> getOrCreateFree(userId));
+                .orElseGet(() -> createSubscription(userId, PlanType.FREE, null));
 
-        if (sub.getEndDate() != null &&
-                sub.getEndDate().isBefore(Instant.now())) {
-
+        if (sub.getEndDate() != null && sub.getEndDate().isBefore(Instant.now())) {
             sub.setActive(false);
             sub.setUpdatedAt(Instant.now());
             subscriptionRepository.save(sub);
-
-            throw new RuntimeException("Subscription expired. Upgrade required.");
+            throw new RuntimeException("Subscription expired. Please upgrade your plan.");
         }
 
         return sub;
     }
 
     /* =======================================================
-       AUTO CREATE FREE PLAN
-    ======================================================= */
-    public Subscription getOrCreateFree(String userId) {
-
-        return subscriptionRepository
-                .findByUserIdAndActiveTrue(userId)
-                .orElseGet(() -> createSubscription(userId, PlanType.FREE, null));
-    }
-
-    /* =======================================================
        CREATE / UPGRADE SUBSCRIPTION
+       ⚠️  INTERNAL USE ONLY — called by PaymentService after
+       confirmed payment. Never expose this directly to users.
     ======================================================= */
     public Subscription createSubscription(String userId,
                                            PlanType plan,
                                            Instant endDate) {
 
-        // deactivate existing
         subscriptionRepository.findByUserIdAndActiveTrue(userId)
                 .ifPresent(existing -> {
                     existing.setActive(false);
@@ -79,7 +72,7 @@ public class SubscriptionService {
         sub.setEndDate(endDate);
         sub.setActive(true);
 
-        applyPlanLimits(sub, plan);
+        applyPlanLimits(sub, plan); // reads from DB — no hardcoded limits
 
         sub.setCreatedAt(Instant.now());
         sub.setUpdatedAt(Instant.now());
@@ -88,106 +81,76 @@ public class SubscriptionService {
     }
 
     /* =======================================================
-       PLAN LIMIT CONFIGURATION
+       PLAN LIMIT CONFIGURATION — DB DRIVEN
+       Previously limits were hardcoded here. Now they are
+       read from the subscription_plans collection.
+       Admin can update price/limits via API without redeploying.
     ======================================================= */
     private void applyPlanLimits(Subscription sub, PlanType plan) {
 
-        switch (plan) {
+        SubscriptionPlan planConfig = subscriptionPlanRepository
+                .findByPlanType(plan)
+                .orElseThrow(() -> new RuntimeException(
+                        "Plan config missing for: " + plan
+                        + ". Seed the subscription_plans collection."));
 
-            case FREE -> {
-                sub.setResumeLimit(1);
-                sub.setPublicLinkLimit(0);
-                sub.setVersioningEnabled(false);
-            }
-
-            case BASIC -> {
-                sub.setResumeLimit(1);
-                sub.setPublicLinkLimit(1);
-                sub.setVersioningEnabled(false);
-            }
-
-            case PRO -> {
-                sub.setResumeLimit(2);
-                sub.setPublicLinkLimit(1);
-                sub.setVersioningEnabled(true);
-            }
-
-            case PREMIUM -> {
-                sub.setResumeLimit(3);
-                sub.setPublicLinkLimit(2);
-                sub.setVersioningEnabled(true);
-            }
-        }
+        sub.setResumeLimit(planConfig.getResumeLimit());
+        sub.setPublicLinkLimit(planConfig.getPublicLinkLimit());
+        sub.setVersioningEnabled(planConfig.isVersioningEnabled());
+        sub.setThemeCustomizationEnabled(planConfig.isThemeCustomizationEnabled());
     }
 
     /* =======================================================
-       RESUME LIMIT VALIDATION
+       VALIDATIONS
     ======================================================= */
     public void validateResumeCreation(String userId, long currentCount) {
-
         Subscription sub = getActiveSubscription(userId);
-
         if (currentCount >= sub.getResumeLimit()) {
             throw new RuntimeException(
-                    "Resume limit reached for plan: " + sub.getPlan());
+                    "Resume limit reached for plan: " + sub.getPlan()
+                    + ". Upgrade to create more resumes.");
         }
     }
 
-    /* =======================================================
-       PUBLIC LINK VALIDATION
-    ======================================================= */
     public void validatePublicPublish(String userId, long publishedCount) {
-
         Subscription sub = getActiveSubscription(userId);
-
+        if (sub.getPublicLinkLimit() == 0) {
+            throw new RuntimeException(
+                    "Public portfolio links are not available on the FREE plan. Please upgrade.");
+        }
         if (publishedCount >= sub.getPublicLinkLimit()) {
             throw new RuntimeException(
-                    "Public portfolio limit reached for plan: " + sub.getPlan());
+                    "Public portfolio limit reached for plan: " + sub.getPlan()
+                    + ". Upgrade to publish more portfolios.");
         }
     }
 
-    /* =======================================================
-       VERSIONING VALIDATION
-    ======================================================= */
     public void validateVersioning(String userId) {
-
         Subscription sub = getActiveSubscription(userId);
-
         if (!sub.isVersioningEnabled()) {
             throw new RuntimeException(
-                    "Versioning not allowed in your current plan");
+                    "Resume versioning is not available on the " + sub.getPlan()
+                    + " plan. Upgrade to PRO or PREMIUM.");
         }
     }
 
-    /* =======================================================
-       TEMPLATE GATING
-    ======================================================= */
-    public boolean isTemplateAllowed(String userId, String templateId) {
-
-        Template template = templateRepository
-                .findByIdAndActiveTrue(templateId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Template not found"));
-
+    public void validateThemeCustomization(String userId) {
         Subscription sub = getActiveSubscription(userId);
-
-        PlanType userPlan = sub.getPlan();
-        PlanType requiredPlan = template.getPlanLevel();
-
-        return switch (requiredPlan) {
-            case FREE -> true;
-            case BASIC -> userPlan == PlanType.BASIC
-                    || userPlan == PlanType.PRO
-                    || userPlan == PlanType.PREMIUM;
-            case PRO -> userPlan == PlanType.PRO
-                    || userPlan == PlanType.PREMIUM;
-            case PREMIUM -> userPlan == PlanType.PREMIUM;
-        };
+        if (!sub.isThemeCustomizationEnabled()) {
+            throw new RuntimeException(
+                    "Theme customization is not available on the " + sub.getPlan()
+                    + " plan. Upgrade to PRO or PREMIUM.");
+        }
     }
 
-    /* =======================================================
-       SIMPLE ACTIVE CHECK
-    ======================================================= */
+    public boolean isTemplateAllowed(String userId, String templateId) {
+        Template template = templateRepository
+                .findByIdAndActiveTrue(templateId)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found"));
+        Subscription sub = getActiveSubscription(userId);
+        return sub.getPlan().ordinal() >= template.getPlanLevel().ordinal();
+    }
+
     public boolean isSubscriptionActive(String userId) {
         return subscriptionRepository.findByUserIdAndActiveTrue(userId)
                 .filter(sub -> sub.getEndDate() == null ||
@@ -195,10 +158,11 @@ public class SubscriptionService {
                 .isPresent();
     }
 
-    /* =======================================================
-       GET CURRENT PLAN (FOR FRONTEND USE)
-    ======================================================= */
     public PlanType getCurrentPlan(String userId) {
         return getActiveSubscription(userId).getPlan();
+    }
+
+    public Subscription getSubscriptionDetails(String userId) {
+        return getActiveSubscription(userId);
     }
 }

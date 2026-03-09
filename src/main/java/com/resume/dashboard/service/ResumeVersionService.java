@@ -32,38 +32,70 @@ public class ResumeVersionService {
     }
 
     /* =====================================================
-       INITIAL VERSION (called internally only)
+       INITIAL VERSION (called internally only on resume creation)
+       No plan check — every user gets their initial snapshot.
     ===================================================== */
     @Transactional
     public void createInitialVersion(Resume resume) {
 
         ResumeVersion version = buildSnapshot(resume, "Initial version");
         version.setCurrent(true);
-
         versionRepository.save(version);
     }
 
     /* =====================================================
-       CREATE NEW SNAPSHOT (Manual - Plan Restricted)
+       CREATE VERSION — USER FACING (Plan Restricted)
+       Only PRO and PREMIUM users can manually trigger this.
+       FIX: Renamed from createVersion to make intent explicit.
     ===================================================== */
     @Transactional
     public ResumeVersion createVersion(String userId,
                                        String resumeId,
                                        String changeNote) {
 
-        // 🔥 PLAN ENFORCEMENT
+        // 🔥 Plan enforcement — only PRO and PREMIUM pass
         subscriptionService.validateVersioning(userId);
+
+        return saveNewVersion(userId, resumeId, changeNote);
+    }
+
+    /* =====================================================
+       CREATE VERSION — INTERNAL (System Only, No Plan Check)
+       Used by ResumeService.publishResume for auto-snapshots.
+       Must NOT be called from user-facing endpoints directly.
+
+       FIX: Previously publishResume called createVersion which
+            called validateVersioning — this would block FREE/BASIC
+            users from publishing, which is wrong. Auto-snapshots
+            on publish are a system action, not a user versioning action.
+    ===================================================== */
+    @Transactional
+    public ResumeVersion createVersionInternal(String resumeId,
+                                               String userId,
+                                               String changeNote) {
+        // No plan check — system-initiated snapshot only
+        return saveNewVersion(userId, resumeId, changeNote);
+    }
+
+    /* =====================================================
+       SHARED SAVE LOGIC
+    ===================================================== */
+    private ResumeVersion saveNewVersion(String userId,
+                                         String resumeId,
+                                         String changeNote) {
 
         Resume resume = getOwnedResume(userId, resumeId);
 
         List<ResumeVersion> versions =
                 versionRepository.findByResumeIdOrderByCreatedAtDesc(resumeId);
 
-        if (versions.size() == 2) {
-            versionRepository.delete(versions.get(1));
+        // Keep max 2 versions — drop oldest when at cap
+        if (versions.size() >= 2) {
+            versionRepository.delete(versions.get(versions.size() - 1));
         }
 
-        if (versions.size() >= 1) {
+        // Mark current version as non-current
+        if (!versions.isEmpty()) {
             ResumeVersion current = versions.get(0);
             current.setCurrent(false);
             versionRepository.save(current);
@@ -76,14 +108,15 @@ public class ResumeVersionService {
     }
 
     /* =====================================================
-       GET VERSIONS
+       GET VERSIONS — USER FACING (Plan Restricted)
+       Only PRO and PREMIUM can view version history.
     ===================================================== */
     public List<ResumeVersionResponse> getVersions(String userId,
                                                    String resumeId) {
 
-        Resume resume = getOwnedResume(userId, resumeId);
+        getOwnedResume(userId, resumeId); // ownership check
 
-        // 🔥 Only allow viewing versions if versioning enabled
+        // 🔥 Only allow if versioning is enabled on plan
         subscriptionService.validateVersioning(userId);
 
         return versionRepository
@@ -95,12 +128,13 @@ public class ResumeVersionService {
 
     /* =====================================================
        REVERT TO PREVIOUS (Plan Restricted)
+       Only PRO and PREMIUM can revert.
     ===================================================== */
     @Transactional
     public Resume revertToPrevious(String userId,
                                    String resumeId) {
 
-        // 🔥 PLAN ENFORCEMENT
+        // 🔥 Plan enforcement
         subscriptionService.validateVersioning(userId);
 
         Resume resume = getOwnedResume(userId, resumeId);
@@ -109,7 +143,7 @@ public class ResumeVersionService {
                 versionRepository.findByResumeIdOrderByCreatedAtDesc(resumeId);
 
         if (versions.size() < 2) {
-            throw new IllegalStateException("No previous version available");
+            throw new IllegalStateException("No previous version available to revert to.");
         }
 
         ResumeVersion previous = versions.stream()
@@ -147,8 +181,7 @@ public class ResumeVersionService {
         return resume;
     }
 
-    private ResumeVersion buildSnapshot(Resume resume,
-                                        String changeNote) {
+    private ResumeVersion buildSnapshot(Resume resume, String changeNote) {
 
         ResumeVersion version = new ResumeVersion();
 
