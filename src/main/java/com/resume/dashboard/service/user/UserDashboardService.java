@@ -64,9 +64,17 @@ public class UserDashboardService {
 
         response.setTotalViews(totalViews);
 
-        response.setResumes(
-                resumes.stream()
-                        .map(this::mapSummary)
+        List<ResumeSummaryDTO> allResumes = resumes.stream()
+                .map(this::mapSummary)
+                .collect(Collectors.toList());
+
+        response.setResumes(allResumes);
+
+        // Set recent resumes (last 5 by updated date)
+        response.setRecentResumes(
+                allResumes.stream()
+                        .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
+                        .limit(5)
                         .collect(Collectors.toList())
         );
 
@@ -83,6 +91,7 @@ public class UserDashboardService {
         dto.setVisibility(resume.getVisibility());
         dto.setApprovalStatus(resume.getApprovalStatus());
         dto.setViewCount(resume.getViewCount());
+        dto.setUpdatedAt(resume.getUpdatedAt());
 
         return dto;
     }

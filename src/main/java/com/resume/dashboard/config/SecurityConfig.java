@@ -30,7 +30,8 @@ public class SecurityConfig {
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, JwtAuthEntryPoint jwtAuthEntryPoint) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          JwtAuthEntryPoint jwtAuthEntryPoint) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
     }
@@ -55,23 +56,44 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/health").permitAll()
-                        .requestMatchers("/api/status").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint))
+            .authorizeHttpRequests(auth -> auth
+
+                // ── FULLY PUBLIC ──────────────────────────────────────
+                .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/api/status").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
+                // Contact form submissions (public portfolio page)
+                .requestMatchers(HttpMethod.POST, "/api/contacts").permitAll()
+                // Backwards-compat for older frontend builds (singular path)
+                .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+                // Public pricing + browsing catalog
+                .requestMatchers(HttpMethod.GET, "/api/plans").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/templates").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/themes").permitAll()
+
+                // ── FIX: upload preview was hitting /api/admin/** → ADMIN role required
+                // It needs to be declared BEFORE the /api/admin/** rule below
+                // so Spring matches it first and permits it.
+                .requestMatchers("/api/admin/upload/**").permitAll()
+
+                // ── ADMIN — all other /api/admin/** require ADMIN role ─
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                // ── AUTHENTICATED USERS ───────────────────────────────
+                .requestMatchers("/api/**").authenticated()
+
+                .anyRequest().permitAll()
+            )
+            .addFilterBefore(jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }

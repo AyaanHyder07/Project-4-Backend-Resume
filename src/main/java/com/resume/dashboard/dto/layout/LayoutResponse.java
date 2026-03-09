@@ -1,15 +1,31 @@
 package com.resume.dashboard.dto.layout;
 
+import com.resume.dashboard.entity.LayoutAudience;
+import com.resume.dashboard.entity.LayoutStructureConfig;
 import com.resume.dashboard.entity.LayoutType;
+import com.resume.dashboard.entity.PlanType;
+import com.resume.dashboard.entity.VisualMood;
+
 
 import java.time.Instant;
+import java.util.List;
 
 public class LayoutResponse {
 
     private String id;
     private String name;
+    private String description;
     private LayoutType layoutType;
-    private String layoutConfigJson;
+
+    private List<LayoutAudience> targetAudiences;
+    private List<VisualMood> compatibleMoods;
+    private List<String> professionTags;
+
+    private LayoutStructureConfig structureConfig;
+
+    private PlanType requiredPlan;
+    private String previewImageUrl;
+
     private boolean active;
     private int version;
     private Instant createdAt;
@@ -26,17 +42,53 @@ public class LayoutResponse {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
 	public LayoutType getLayoutType() {
 		return layoutType;
 	}
 	public void setLayoutType(LayoutType layoutType) {
 		this.layoutType = layoutType;
 	}
-	public String getLayoutConfigJson() {
-		return layoutConfigJson;
+	public List<LayoutAudience> getTargetAudiences() {
+		return targetAudiences;
 	}
-	public void setLayoutConfigJson(String layoutConfigJson) {
-		this.layoutConfigJson = layoutConfigJson;
+	public void setTargetAudiences(List<LayoutAudience> targetAudiences) {
+		this.targetAudiences = targetAudiences;
+	}
+	public List<VisualMood> getCompatibleMoods() {
+		return compatibleMoods;
+	}
+	public void setCompatibleMoods(List<VisualMood> compatibleMoods) {
+		this.compatibleMoods = compatibleMoods;
+	}
+	public List<String> getProfessionTags() {
+		return professionTags;
+	}
+	public void setProfessionTags(List<String> professionTags) {
+		this.professionTags = professionTags;
+	}
+	public LayoutStructureConfig getStructureConfig() {
+		return structureConfig;
+	}
+	public void setStructureConfig(LayoutStructureConfig structureConfig) {
+		this.structureConfig = structureConfig;
+	}
+	public PlanType getRequiredPlan() {
+		return requiredPlan;
+	}
+	public void setRequiredPlan(PlanType requiredPlan) {
+		this.requiredPlan = requiredPlan;
+	}
+	public String getPreviewImageUrl() {
+		return previewImageUrl;
+	}
+	public void setPreviewImageUrl(String previewImageUrl) {
+		this.previewImageUrl = previewImageUrl;
 	}
 	public boolean isActive() {
 		return active;
@@ -62,6 +114,4 @@ public class LayoutResponse {
 	public void setUpdatedAt(Instant updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-
-    // getters & setters
 }

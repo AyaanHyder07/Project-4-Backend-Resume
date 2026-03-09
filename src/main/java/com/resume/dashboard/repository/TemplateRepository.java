@@ -1,6 +1,8 @@
 package com.resume.dashboard.repository;
 
 import com.resume.dashboard.entity.Template;
+import com.resume.dashboard.entity.VisualMood;
+import com.resume.dashboard.entity.LayoutAudience;
 import com.resume.dashboard.entity.PlanType;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -18,4 +20,6 @@ public interface TemplateRepository extends MongoRepository<Template, String> {
     Optional<Template> findByIdAndActiveTrue(String id);
 
     boolean existsByNameIgnoreCase(String name);
+    List<Template> findByTargetAudiencesContainingAndActiveTrue(LayoutAudience audience);
+    List<Template> findByPrimaryMoodAndActiveTrue(VisualMood mood);
 }

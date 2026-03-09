@@ -53,12 +53,13 @@ public class ResumeService {
 
         long existingCount = resumeRepository.countByUserId(userId);
 
-        // 🔥 enforce resume limit
+        // 🔥 Enforce resume limit per plan (FREE=1, BASIC=1, PRO=2, PREMIUM=3)
         subscriptionService.validateResumeCreation(userId, existingCount);
 
-        // 🔥 enforce template gating
+        // 🔥 Enforce template plan gating — uses single canonical logic in SubscriptionService
         if (!subscriptionService.isTemplateAllowed(userId, request.getTemplateId())) {
-            throw new IllegalStateException("Your subscription plan does not allow this template");
+            throw new IllegalStateException(
+                    "Your subscription plan does not allow this template. Please upgrade.");
         }
 
         Template template = templateRepository
@@ -115,21 +116,23 @@ public class ResumeService {
             throw new IllegalStateException("Resume must be approved before publishing");
         }
 
-        // 🔥 check active subscription
+        // 🔥 Check active subscription before publishing
         if (!subscriptionService.isSubscriptionActive(userId)) {
             throw new IllegalStateException("Your subscription is inactive or expired");
         }
 
-        long publishedCount =
-                resumeRepository.countByUserIdAndPublishedTrue(userId);
+        long publishedCount = resumeRepository.countByUserIdAndPublishedTrue(userId);
 
-        // 🔥 enforce public link limit
+        // 🔥 Enforce public link limit per plan (FREE=0, BASIC=1, PRO=1, PREMIUM=2)
         subscriptionService.validatePublicPublish(userId, publishedCount);
 
-        resumeVersionService.createVersion(
-                userId,
+        // Create an auto-snapshot on publish — NOTE: this is an INTERNAL system snapshot,
+        // not a user-triggered version save, so it bypasses validateVersioning intentionally.
+        // User-facing version creation (ResumeVersionService.createVersion) enforces the plan check.
+        resumeVersionService.createVersionInternal(
                 resumeId,
-                "Auto snapshot on admin approval publish"
+                resume.getUserId(),
+                "Auto snapshot on publish"
         );
 
         User user = userRepository.findById(userId)
@@ -159,7 +162,7 @@ public class ResumeService {
     }
 
     /* =========================================================
-       OTHER METHODS UNCHANGED
+       OTHER METHODS
     ========================================================= */
 
     public Resume updateMeta(String userId, String resumeId, String title, String profession) {

@@ -1,18 +1,11 @@
 package com.resume.dashboard.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -21,94 +14,100 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    /* ================================================================
+       FIX: Was TWO handleValidation methods both mapped to
+       MethodArgumentNotValidException — Spring 6 throws
+       "Ambiguous @ExceptionHandler" and refuses to start.
+       SOLUTION: Keep ONE method only. Use WebRequest for path info.
+    ================================================================ */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(
+            MethodArgumentNotValidException ex,
+            WebRequest request) {
 
-    private Map<String, Object> errorBody(String error, String message, String path) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors()
+                .forEach(err -> fieldErrors.put(err.getField(), err.getDefaultMessage()));
+
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
-        body.put("status", 400);
-        body.put("error", error);
-        body.put("message", message);
-        body.put("path", path);
-        return body;
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("errors", fieldErrors);
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return ResponseEntity.badRequest().body(body);
     }
 
+    /* ================================================================
+       RESOURCE NOT FOUND — 404
+    ================================================================ */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Not Found", ex.getMessage(), req.getDescription(false).replace("uri=", ""));
-        body.put("status", 404);
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    public ResponseEntity<Map<String, Object>> handleNotFound(
+            ResourceNotFoundException ex,
+            WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
-    @ExceptionHandler(InvalidStateTransitionException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidState(InvalidStateTransitionException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Bad Request", ex.getMessage(), req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    /* ================================================================
+       ILLEGAL STATE — 400 (plan limit violations, invalid transitions)
+    ================================================================ */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(
+            IllegalStateException ex,
+            WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return ResponseEntity.badRequest().body(body);
     }
 
-    @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedActionException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Forbidden", ex.getMessage(), req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    /* ================================================================
+       ILLEGAL ARGUMENT — 400 (e.g. trying to buy FREE plan)
+    ================================================================ */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(
+            IllegalArgumentException ex,
+            WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return ResponseEntity.badRequest().body(body);
     }
 
-    @ExceptionHandler(UserBlockedException.class)
-    public ResponseEntity<Map<String, Object>> handleUserBlocked(UserBlockedException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Forbidden", ex.getMessage(), req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
-    }
+    /* ================================================================
+       RUNTIME EXCEPTION — 500 (subscription expired, plan config missing, etc.)
+    ================================================================ */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntime(
+            RuntimeException ex,
+            WebRequest request) {
 
-    @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicateEmail(DuplicateEmailException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Conflict", ex.getMessage(), req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
-    }
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Internal Server Error");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
 
-    @ExceptionHandler(InvalidFileException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidFile(InvalidFileException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Bad Request", ex.getMessage(), req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex, WebRequest req) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError err : ex.getBindingResult().getFieldErrors()) {
-            errors.put(err.getField(), err.getDefaultMessage());
-        }
-        Map<String, Object> body = errorBody("Validation Error", "Validation failed", req.getDescription(false).replace("uri=", ""));
-        body.put("status", 400);
-        body.put("errors", errors);
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNoResource(NoResourceFoundException ex, WebRequest req) {
-        log.debug("No resource found: {}", ex.getResourcePath());
-        Map<String, Object> body = errorBody("Not Found", "Resource not found", req.getDescription(false).replace("uri=", ""));
-        body.put("status", 404);
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Forbidden", "Access denied", req.getDescription(false).replace("uri=", ""));
-        body.put("status", 403);
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler({AuthenticationException.class, BadCredentialsException.class})
-    public ResponseEntity<Map<String, Object>> handleAuth(Exception ex, WebRequest req) {
-        Map<String, Object> body = errorBody("Unauthorized", ex.getMessage() != null ? ex.getMessage() : "Authentication failed", req.getDescription(false).replace("uri=", ""));
-        body.put("status", 401);
-        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex, WebRequest req) {
-        log.error("Unexpected error", ex);
-        Map<String, Object> body = errorBody("Internal Server Error", "An unexpected error occurred", req.getDescription(false).replace("uri=", ""));
-        body.put("status", 500);
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

@@ -3,6 +3,7 @@ package com.resume.dashboard.service;
 import com.resume.dashboard.dto.userprofile.*;
 import com.resume.dashboard.entity.Resume;
 import com.resume.dashboard.entity.UserProfile;
+import com.resume.dashboard.exception.FileUploadException;
 import com.resume.dashboard.exception.ResourceNotFoundException;
 import com.resume.dashboard.repository.ResumeRepository;
 import com.resume.dashboard.repository.UserProfileRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
@@ -82,13 +84,16 @@ this.cloudinaryService = cloudinaryService;
 
         applyUpdate(profile, request);
         if (profilePhoto != null && !profilePhoto.isEmpty()) {
-
-            String imageUrl = cloudinaryService.uploadImage(
-                    profilePhoto,
-                    "resume/profile/" + resumeId
-            );
-
-            profile.setProfilePhotoUrl(imageUrl);
+            try {
+                String imageUrl = cloudinaryService.uploadImage(
+                        profilePhoto,
+                        "resume/profile/" + resumeId
+                );
+                profile.setProfilePhotoUrl(imageUrl);
+            } catch (FileUploadException e) {
+                // Log the error but don't fail the update
+                System.err.println("Image upload failed: " + e.getMessage());
+            }
         }
         profile.setUpdatedAt(Instant.now());
 
@@ -193,7 +198,7 @@ this.cloudinaryService = cloudinaryService;
             profile.setDetailedBio(request.getDetailedBio());
 
         if (request.getDateOfBirth() != null)
-            profile.setDateOfBirth(request.getDateOfBirth());
+            profile.setDateOfBirth(LocalDate.parse(request.getDateOfBirth()));
 
         if (request.getGender() != null)
             profile.setGender(request.getGender());
