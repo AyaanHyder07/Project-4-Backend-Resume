@@ -61,15 +61,15 @@ public class TemplateController {
         PlanType userPlan = (userId != null) ? subscriptionService.getCurrentPlan(userId) : PlanType.FREE;
 
         if (profession != null) {
-            return ResponseEntity.ok(templateService.getByProfession(profession, userPlan));
+            return ResponseEntity.ok(templateService.getByProfession(profession, PlanType.PREMIUM));
         }
         if (audience != null) {
-            return ResponseEntity.ok(templateService.getByAudience(audience, userPlan));
+            return ResponseEntity.ok(templateService.getByAudience(audience, PlanType.PREMIUM));
         }
         if (mood != null) {
-            return ResponseEntity.ok(templateService.getByMood(mood, userPlan));
+            return ResponseEntity.ok(templateService.getByMood(mood, PlanType.PREMIUM));
         }
-        return ResponseEntity.ok(templateService.getAvailableTemplates(userPlan));
+        return ResponseEntity.ok(templateService.getAvailableTemplates(PlanType.PREMIUM));
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.resume.dashboard.service;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -247,5 +248,9 @@ public class ResumeService {
     private void incrementViewCount(Resume resume) {
         resume.setViewCount(resume.getViewCount() + 1);
         resumeRepository.save(resume);
+    }
+
+       public List<Resume> getAllByUser(String userId) {
+        return resumeRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 }

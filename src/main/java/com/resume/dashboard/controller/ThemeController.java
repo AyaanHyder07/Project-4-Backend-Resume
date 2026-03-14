@@ -53,28 +53,12 @@ public class ThemeController {
                 : PlanType.FREE;
 
         if (audience != null) {
-            return ResponseEntity.ok(
-                themeService.getByAudience(audience)
-                    .stream()
-                    .filter(t -> {
-                        PlanType themePlan = t.getRequiredPlan() != null ? t.getRequiredPlan() : PlanType.FREE;
-                        return userPlan.ordinal() >= themePlan.ordinal();
-                    })
-                    .toList()
-            );
+            return ResponseEntity.ok(themeService.getByAudience(audience));
         }
         if (mood != null) {
-            return ResponseEntity.ok(
-                themeService.getByMood(mood)
-                    .stream()
-                    .filter(t -> {
-                        PlanType themePlan = t.getRequiredPlan() != null ? t.getRequiredPlan() : PlanType.FREE;
-                        return userPlan.ordinal() >= themePlan.ordinal();
-                    })
-                    .toList()
-            );
+            return ResponseEntity.ok(themeService.getByMood(mood));
         }
-        return ResponseEntity.ok(themeService.getAvailableForPlan(userPlan));
+        return ResponseEntity.ok(themeService.getAvailableForPlan(PlanType.PREMIUM));
     }
 
     /**
