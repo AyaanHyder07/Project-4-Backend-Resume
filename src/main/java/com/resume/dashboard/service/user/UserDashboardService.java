@@ -73,7 +73,11 @@ public class UserDashboardService {
         // Set recent resumes (last 5 by updated date)
         response.setRecentResumes(
                 allResumes.stream()
-                        .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
+                        .sorted((a, b) -> {
+                            java.time.Instant aTime = a.getUpdatedAt() != null ? a.getUpdatedAt() : java.time.Instant.EPOCH;
+                            java.time.Instant bTime = b.getUpdatedAt() != null ? b.getUpdatedAt() : java.time.Instant.EPOCH;
+                            return bTime.compareTo(aTime);
+                        })
                         .limit(5)
                         .collect(Collectors.toList())
         );
