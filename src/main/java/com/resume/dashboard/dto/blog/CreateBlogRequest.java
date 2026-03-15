@@ -21,6 +21,8 @@ public class CreateBlogRequest {
 
     private List<String> tags;
 
+    private String visibility;
+
 	public String getResumeId() {
 		return resumeId;
 	}
@@ -59,6 +61,14 @@ public class CreateBlogRequest {
 
 	public void setTags(List<String> tags) {
 		this.tags = tags;
+	}
+
+	public String getVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(String visibility) {
+		this.visibility = visibility;
 	}
 
     // getters & setters

@@ -2,6 +2,7 @@ package com.resume.dashboard.dto.financial;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import com.resume.dashboard.entity.VisibilityType;
 
 import java.time.LocalDate;
 
@@ -27,6 +28,8 @@ public class CreateFinancialCredentialRequest {
     private String region;
 
     private String verificationUrl;
+
+    private VisibilityType visibility;
 
 	public String getResumeId() {
 		return resumeId;
@@ -98,6 +101,14 @@ public class CreateFinancialCredentialRequest {
 
 	public void setVerificationUrl(String verificationUrl) {
 		this.verificationUrl = verificationUrl;
+	}
+
+	public VisibilityType getVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(VisibilityType visibility) {
+		this.visibility = visibility;
 	}
 
     // getters & setters

@@ -67,7 +67,12 @@ public class CloudinaryService {
      * Return type: String (secure URL) — unchanged.
      */
     public String uploadImage(MultipartFile file, String folder) {
-        return uploadOptimized(file, folder, "img_" + shortId()).secureUrl();
+        try {
+            return uploadOptimized(file, folder, "img_" + shortId()).secureUrl();
+        } catch (Exception e) {
+            System.err.println("[CloudinaryService] Image upload failed: " + e.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -77,8 +82,8 @@ public class CloudinaryService {
      * Return type: String (secure URL) — unchanged.
      */
     public String uploadVideo(MultipartFile file, String folder) {
-        validateFile(file, false); // false = don't restrict to image types
         try {
+            validateFile(file, false); // false = don't restrict to image types
             Map<?, ?> result = cloudinary.uploader().upload(
                 file.getBytes(),
                 ObjectUtils.asMap(
@@ -90,10 +95,9 @@ public class CloudinaryService {
             );
             return result.get("secure_url").toString();
 
-        } catch (IOException e) {
-            throw new FileUploadException("Video upload failed: " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new FileUploadException("Video upload failed: " + e.getMessage(), e);
+            System.err.println("[CloudinaryService] Video upload failed: " + e.getMessage());
+            return null;
         }
     }
 

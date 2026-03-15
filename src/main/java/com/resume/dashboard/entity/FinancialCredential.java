@@ -44,6 +44,8 @@ public class FinancialCredential {
 
     private Instant updatedAt;
 
+    private VisibilityType visibility;
+
 	public String getId() {
 		return id;
 	}
@@ -163,6 +165,12 @@ public class FinancialCredential {
 	public void setUpdatedAt(Instant updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-    
-    
+
+	public VisibilityType getVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(VisibilityType visibility) {
+		this.visibility = visibility;
+	}
 }

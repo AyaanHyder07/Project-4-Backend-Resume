@@ -64,6 +64,7 @@ this.cloudinaryService = cloudinaryService;
         entity.setValidTill(request.getValidTill());
         entity.setStatus(calculateStatus(request.getValidTill()));
         entity.setRegion(request.getRegion());
+        entity.setVisibility(request.getVisibility() != null ? request.getVisibility() : VisibilityType.PUBLIC);
         String proofUrl = request.getVerificationUrl(); // fallback if frontend sends external URL
 
         if (proofFile != null && !proofFile.isEmpty()) {
@@ -118,6 +119,7 @@ this.cloudinaryService = cloudinaryService;
         }
 
         entity.setRegion(request.getRegion());
+        entity.setVisibility(request.getVisibility() != null ? request.getVisibility() : VisibilityType.PUBLIC);
         if (proofFile != null && !proofFile.isEmpty()) {
 
             String newUrl = cloudinaryService.uploadImage(

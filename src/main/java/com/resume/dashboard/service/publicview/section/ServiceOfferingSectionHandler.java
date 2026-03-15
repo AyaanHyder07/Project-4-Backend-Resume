@@ -36,9 +36,9 @@ public class ServiceOfferingSectionHandler implements SectionHandler {
         dto.setServiceTitle(s.getServiceTitle());
         dto.setServiceCategory(s.getServiceCategory());
         dto.setDescription(s.getDescription());
-        dto.setPricingModel(s.getPricingModel().name());
+        dto.setPricingModel(s.getPricingModel() != null ? s.getPricingModel().name() : null);
         dto.setBasePrice(s.getBasePrice());
-        dto.setCurrency(s.getCurrency().name());
+        dto.setCurrency(s.getCurrency() != null ? s.getCurrency().name() : null);
         dto.setDeliverables(s.getDeliverables());
         dto.setFeatured(s.isFeatured());
         return dto;

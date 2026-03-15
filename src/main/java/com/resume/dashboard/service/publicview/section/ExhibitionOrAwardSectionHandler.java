@@ -33,7 +33,7 @@ public class ExhibitionOrAwardSectionHandler implements SectionHandler {
                     dto.setLocation(e.getLocation());
                     dto.setYear(e.getYear());
                     dto.setDescription(e.getDescription());
-                    dto.setAwardType(e.getAwardType().name());
+                    dto.setAwardType(e.getAwardType() != null ? e.getAwardType().name() : null);
                     return dto;
                 }).toList();
     }

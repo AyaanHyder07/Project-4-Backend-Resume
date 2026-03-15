@@ -59,12 +59,16 @@ public class AdminService {
         // 1️⃣ Set Approved
         resume.setApprovalStatus(ApprovalStatus.APPROVED);
 
-        // 2️⃣ Snapshot version before publish
-        resumeVersionService.createVersion(
-                resume.getUserId(),
-                resume.getId(),
-                "Auto snapshot on admin approval"
-        );
+        // 2️⃣ Snapshot version before publish (if plan allows)
+        try {
+            resumeVersionService.createVersion(
+                    resume.getUserId(),
+                    resume.getId(),
+                    "Auto snapshot on admin approval"
+            );
+        } catch (RuntimeException e) {
+            // Ignore if user's plan doesn't support versioning
+        }
 
         // 3️⃣ Generate slug
         User user = userRepository.findById(resume.getUserId())

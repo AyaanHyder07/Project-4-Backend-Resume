@@ -34,7 +34,7 @@ public class PublicationSectionHandler implements SectionHandler {
     private PublicPublicationDTO map(Publication p) {
         PublicPublicationDTO dto = new PublicPublicationDTO();
         dto.setTitle(p.getTitle());
-        dto.setType(p.getType().name());
+        dto.setType(p.getType() != null ? p.getType().name() : null);
         dto.setPublisher(p.getPublisher());
         dto.setPublicationDate(p.getPublicationDate());
         dto.setContentUrl(p.getContentUrl());

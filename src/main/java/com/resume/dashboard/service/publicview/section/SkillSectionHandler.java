@@ -34,7 +34,7 @@ public class SkillSectionHandler implements SectionHandler {
     private PublicSkillDTO map(Skill skill) {
         PublicSkillDTO dto = new PublicSkillDTO();
         dto.setSkillName(skill.getSkillName());
-        dto.setCategory(skill.getCategory().name());
+        dto.setCategory(skill.getCategory() != null ? skill.getCategory().name() : null);
         dto.setYearsOfExperience(skill.getYearsOfExperience());
         return dto;
     }

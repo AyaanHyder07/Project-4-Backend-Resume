@@ -59,6 +59,7 @@ public class ExhibitionOrAwardService {
         entity.setYear(request.getYear());
         entity.setDescription(request.getDescription());
         entity.setAwardType(type);
+        entity.setVisibility(request.getVisibility() != null ? request.getVisibility() : VisibilityType.PUBLIC);
         entity.setDisplayOrder(nextOrder);
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());

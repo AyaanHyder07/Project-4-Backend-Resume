@@ -27,6 +27,8 @@ public class ExhibitionOrAward {
 
     private AwardType awardType; // Award / Exhibition / Recognition / Achievement
 
+    private VisibilityType visibility;
+
     private int displayOrder;
 
     private Instant createdAt;
@@ -110,6 +112,14 @@ public class ExhibitionOrAward {
 
 	public void setAwardType(AwardType awardType) {
 		this.awardType = awardType;
+	}
+
+	public VisibilityType getVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(VisibilityType visibility) {
+		this.visibility = visibility;
 	}
 
 	public int getDisplayOrder() {

@@ -2,6 +2,7 @@ package com.resume.dashboard.dto.exhibition;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import com.resume.dashboard.entity.VisibilityType;
 
 public class CreateExhibitionRequest {
 
@@ -22,6 +23,8 @@ public class CreateExhibitionRequest {
 
     @NotBlank
     private String awardType; // convert to enum inside service
+
+    private VisibilityType visibility;
 
 	public String getResumeId() {
 		return resumeId;
@@ -77,6 +80,14 @@ public class CreateExhibitionRequest {
 
 	public void setAwardType(String awardType) {
 		this.awardType = awardType;
+	}
+
+	public VisibilityType getVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(VisibilityType visibility) {
+		this.visibility = visibility;
 	}
 
     // getters & setters

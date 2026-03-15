@@ -62,7 +62,13 @@ this.cloudinaryService = cloudinaryService;
         blog.setCoverImage(coverUrl);
         blog.setContent(request.getContent());
         blog.setTags(request.getTags());
-        blog.setVisibility("Draft");
+        
+        String visibility = request.getVisibility() != null ? request.getVisibility() : "Draft";
+        blog.setVisibility(visibility);
+        if ("Public".equals(visibility)) {
+            blog.setPublishedAt(Instant.now());
+        }
+        
         blog.setViewCount(0);
         blog.setCreatedAt(Instant.now());
         blog.setUpdatedAt(Instant.now());

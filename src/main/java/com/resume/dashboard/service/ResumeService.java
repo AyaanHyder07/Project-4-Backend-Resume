@@ -22,6 +22,7 @@ public class ResumeService {
     private final ResumeVersionService resumeVersionService;
     private final UserRepository userRepository;
     private final PortfolioSectionConfigService sectionService;
+    private final UserProfileService userProfileService;
 
     public ResumeService(
             ResumeRepository resumeRepository,
@@ -31,7 +32,8 @@ public class ResumeService {
             ThemeRepository themeRepository,
             ResumeVersionService resumeVersionService,
             UserRepository userRepository,
-            PortfolioSectionConfigService sectionService) {
+            PortfolioSectionConfigService sectionService,
+            UserProfileService userProfileService) {
 
         this.resumeRepository = resumeRepository;
         this.subscriptionService = subscriptionService;
@@ -41,6 +43,7 @@ public class ResumeService {
         this.resumeVersionService = resumeVersionService;
         this.userRepository = userRepository;
         this.sectionService = sectionService;
+        this.userProfileService = userProfileService;
     }
 
     /* =========================================================
@@ -101,6 +104,7 @@ public class ResumeService {
         Resume saved = resumeRepository.save(resume);
 
         sectionService.initializeDefaultSections(saved.getId());
+        userProfileService.createEmptyProfile(saved.getId());
 
         return saved;
     }

@@ -70,6 +70,23 @@ this.cloudinaryService = cloudinaryService;
     }
 
     /*
+     * CREATE EMPTY PROFILE (auto-generated when resume is created)
+     */
+    public void createEmptyProfile(String resumeId) {
+        if (repository.existsByResumeId(resumeId)) {
+            return;
+        }
+
+        UserProfile profile = new UserProfile();
+        profile.setId(UUID.randomUUID().toString());
+        profile.setResumeId(resumeId);
+        profile.setCreatedAt(Instant.now());
+        profile.setUpdatedAt(Instant.now());
+
+        repository.save(profile);
+    }
+
+    /*
      * UPDATE PROFILE
      */
     public UserProfileResponse update(String userId,

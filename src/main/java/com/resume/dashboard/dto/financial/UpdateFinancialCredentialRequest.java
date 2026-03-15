@@ -1,6 +1,7 @@
 package com.resume.dashboard.dto.financial;
 
 import jakarta.validation.constraints.NotBlank;
+import com.resume.dashboard.entity.VisibilityType;
 
 import java.time.LocalDate;
 
@@ -25,6 +26,8 @@ public class UpdateFinancialCredentialRequest {
     private String verificationUrl;
 
     private String status;
+
+    private VisibilityType visibility;
 
 	public String getCredentialType() {
 		return credentialType;
@@ -96,6 +99,14 @@ public class UpdateFinancialCredentialRequest {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public VisibilityType getVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(VisibilityType visibility) {
+		this.visibility = visibility;
 	}
 
     // getters & setters
