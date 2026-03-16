@@ -23,6 +23,10 @@ public class TemplateResponse {
     // References — IDs only in response (frontend fetches full objects separately if needed)
     private String layoutId;
     private String defaultThemeId;
+    
+    // Add enriched objects for frontend visual preview
+    private Object layout;
+    private Object theme;
 
     private List<LayoutAudience> targetAudiences;
     private List<String> professionTags;
@@ -92,6 +96,18 @@ public class TemplateResponse {
 	}
 	public void setDefaultThemeId(String defaultThemeId) {
 		this.defaultThemeId = defaultThemeId;
+	}
+	public Object getLayout() {
+		return layout;
+	}
+	public void setLayout(Object layout) {
+		this.layout = layout;
+	}
+	public Object getTheme() {
+		return theme;
+	}
+	public void setTheme(Object theme) {
+		this.theme = theme;
 	}
 	public List<LayoutAudience> getTargetAudiences() {
 		return targetAudiences;

@@ -17,12 +17,15 @@ public class PortfolioSectionConfigService {
 
     private final PortfolioSectionConfigRepository repo;
     private final ResumeRepository resumeRepo;
+    private final com.resume.dashboard.repository.TemplateRepository templateRepo;
 
     public PortfolioSectionConfigService(
             PortfolioSectionConfigRepository repo,
-            ResumeRepository resumeRepo) {
+            ResumeRepository resumeRepo,
+            com.resume.dashboard.repository.TemplateRepository templateRepo) {
         this.repo = repo;
         this.resumeRepo = resumeRepo;
+        this.templateRepo = templateRepo;
     }
 
     /*
@@ -30,20 +33,37 @@ public class PortfolioSectionConfigService {
      */
     public void initializeDefaultSections(String resumeId) {
 
+        Resume resume = resumeRepo.findById(resumeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
+
+        Template template = templateRepo.findById(resume.getTemplateId())
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found"));
+
+        List<String> supported = template.getSupportedSections();
+        if (supported == null || supported.isEmpty()) {
+            // Fallback if template is malformed: add basics
+            supported = List.of("PROFILE", "EXPERIENCE", "EDUCATION", "SKILLS", "PROJECTS");
+        }
+
         int order = 1;
 
-        for (PortfolioSectionType type : PortfolioSectionType.values()) {
+        for (String sectionString : supported) {
+            try {
+                PortfolioSectionType type = PortfolioSectionType.valueOf(sectionString);
+                
+                PortfolioSectionConfig config = new PortfolioSectionConfig();
+                config.setId(UUID.randomUUID().toString());
+                config.setResumeId(resumeId);
+                config.setSectionName(type);
+                config.setEnabled(true);
+                config.setDisplayOrder(order++);
+                config.setCreatedAt(Instant.now());
+                config.setUpdatedAt(Instant.now());
 
-            PortfolioSectionConfig config = new PortfolioSectionConfig();
-            config.setId(UUID.randomUUID().toString());
-            config.setResumeId(resumeId);
-            config.setSectionName(type);
-            config.setEnabled(true);
-            config.setDisplayOrder(order++);
-            config.setCreatedAt(Instant.now());
-            config.setUpdatedAt(Instant.now());
-
-            repo.save(config);
+                repo.save(config);
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid section strings from old template data
+            }
         }
     }
 

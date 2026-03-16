@@ -13,6 +13,7 @@ import com.resume.dashboard.service.publicview.section.SectionHandler;
 import com.resume.dashboard.service.publicview.section.SectionHandlerRegistry;
 import com.resume.dashboard.service.UserThemeCustomizationService;
 import com.resume.dashboard.service.user.AnalyticsService;
+import com.resume.dashboard.service.UserProfileService;
 
 @Service
 public class PublicPortfolioAggregatorService {
@@ -25,6 +26,7 @@ public class PublicPortfolioAggregatorService {
     private final UserThemeCustomizationRepository customizationRepository;
     private final SectionHandlerRegistry registry;
     private final AnalyticsService analyticsService;
+    private final UserProfileService userProfileService;
 
     public PublicPortfolioAggregatorService(
             ResumeRepository resumeRepository,
@@ -34,7 +36,8 @@ public class PublicPortfolioAggregatorService {
             PortfolioSectionConfigRepository sectionConfigRepository,
             UserThemeCustomizationRepository customizationRepository,
             SectionHandlerRegistry registry,
-            AnalyticsService analyticsService) {
+            AnalyticsService analyticsService,
+            UserProfileService userProfileService) {
 
         this.resumeRepository = resumeRepository;
         this.layoutRepository = layoutRepository;
@@ -44,6 +47,7 @@ public class PublicPortfolioAggregatorService {
         this.customizationRepository = customizationRepository;
         this.registry = registry;
         this.analyticsService = analyticsService;
+        this.userProfileService = userProfileService;
     }
 
     /* =============================================================
@@ -133,6 +137,14 @@ public class PublicPortfolioAggregatorService {
         response.setLayout(layoutDTO);
         response.setTheme(resolvedTheme);
         response.setSections(sections);
+
+        // Fetch profile explicitly (may not exist if user hasn't filled it)
+        try {
+            response.setProfile(userProfileService.getPublic(resume.getId()));
+        } catch (Exception e) {
+            // No profile found, leave it null
+            response.setProfile(null);
+        }
 
         return response;
     }

@@ -22,9 +22,15 @@ public class PublicPortfolioResponse {
     // Ordered map: sectionName → section data object
     // e.g. "HERO" → HeroSectionData, "EXPERIENCE" → List<ExperienceItem>
     private Map<String, Object> sections;
+    
+    // Explicit profile wrapper since it is not handled by generic section handlers
+    private com.resume.dashboard.dto.userprofile.PublicUserProfileResponse profile;
 
     public String getResumeId() { return resumeId; }
     public void setResumeId(String resumeId) { this.resumeId = resumeId; }
+
+    public com.resume.dashboard.dto.userprofile.PublicUserProfileResponse getProfile() { return profile; }
+    public void setProfile(com.resume.dashboard.dto.userprofile.PublicUserProfileResponse profile) { this.profile = profile; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

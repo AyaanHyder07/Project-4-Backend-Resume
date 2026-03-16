@@ -213,6 +213,31 @@ public class TemplateService {
         r.setVersion(t.getVersion());
         r.setCreatedAt(t.getCreatedAt());
         r.setUpdatedAt(t.getUpdatedAt());
+
+        // Enrich with Layout and Theme summaries for visual previews
+        try {
+            layoutRepository.findById(t.getLayoutId()).ifPresent(layout -> {
+                com.resume.dashboard.dto.publicview.LayoutDTO l = new com.resume.dashboard.dto.publicview.LayoutDTO();
+                l.setLayoutType(layout.getLayoutType().name());
+                l.setLayoutVersion(layout.getVersion());
+                l.setStructureConfig(layout.getStructureConfig());
+                r.setLayout(l);
+            });
+
+            themeRepository.findById(t.getDefaultThemeId()).ifPresent(theme -> {
+                com.resume.dashboard.dto.publicview.ResolvedThemeDTO th = new com.resume.dashboard.dto.publicview.ResolvedThemeDTO();
+                th.setThemeId(theme.getId());
+                th.setThemeName(theme.getName());
+                th.setColorPalette(theme.getColorPalette());
+                th.setBackground(theme.getBackground());
+                th.setTypography(theme.getTypography());
+                th.setEffects(theme.getEffects());
+                r.setTheme(th);
+            });
+        } catch (Exception e) {
+            // Ignore DB fetch errors during mapping
+        }
+
         return r;
     }
     // ─── GET ACTIVE BY ID ────────────────────────────────────────────
