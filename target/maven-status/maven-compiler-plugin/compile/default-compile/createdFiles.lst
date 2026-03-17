@@ -212,6 +212,7 @@ com\resume\dashboard\repository\SubscriptionPlanRepository.class
 com\resume\dashboard\dto\financial\FinancialCredentialResponse.class
 com\resume\dashboard\dto\project\UpdateProjectRequest.class
 com\resume\dashboard\service\TestimonialService.class
+com\resume\dashboard\config\AdminUserSeeder.class
 com\resume\dashboard\dto\publicview\ThemeDTO.class
 com\resume\dashboard\dto\projectgallery\CreateProjectGalleryRequest.class
 com\resume\dashboard\controller\ExhibitionOrAwardController.class

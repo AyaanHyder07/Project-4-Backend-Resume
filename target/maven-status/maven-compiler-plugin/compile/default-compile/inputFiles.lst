@@ -202,6 +202,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\pub
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\exception\ResourceNotFoundException.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publication\PublicPublicationResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\TemplateRepository.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\config\AdminUserSeeder.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\TemplateController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ApprovalStatus.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\security\JwtAuthenticationFilter.java
