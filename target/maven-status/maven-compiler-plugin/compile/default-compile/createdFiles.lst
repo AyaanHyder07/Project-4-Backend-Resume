@@ -116,6 +116,7 @@ com\resume\dashboard\dto\publicview\PublicBlogPostDTO.class
 com\resume\dashboard\dto\publicview\PublicServiceOfferingDTO.class
 com\resume\dashboard\service\BlogPostService.class
 com\resume\dashboard\dto\layout\UpdateLayoutRequest.class
+com\resume\dashboard\config\PortfolioCatalogSeeder.class
 com\resume\dashboard\entity\ProjectStatus.class
 com\resume\dashboard\controller\SkillController.class
 com\resume\dashboard\dto\testimonial\TestimonialResponse.class

@@ -78,6 +78,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\tem
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\analytics\AnalyticsSummaryResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\blog\UpdateBlogRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\financial\CreateFinancialCredentialRequest.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\config\PortfolioCatalogSeeder.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\financial\UpdateFinancialCredentialRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\media\PublicMediaAppearanceResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\PaymentOrder.java
