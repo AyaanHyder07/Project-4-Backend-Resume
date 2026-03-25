@@ -19,6 +19,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\exception\InvalidFileException.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\customization\ResolvedThemeResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\FinancialCredentialType.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\PortfolioBlockController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\AnalyticsEventRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\auth\ForgotPasswordRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publicview\PublicBlogPostDTO.java
@@ -37,6 +38,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\config\SubscriptionPlanSeeder.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\media\MediaAppearanceResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\section\CreatePortfolioSectionRequest.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publicview\PublicPortfolioBlockDTO.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\MediaAppearance.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\publicview\section\PublicationSectionHandler.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\LayoutStructureConfig.java
@@ -67,6 +69,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\use
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\AnalyticsEvent.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\project\PublicProjectResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\testimonial\TestimonialResponse.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\portfolioBlock\UpdatePortfolioBlockRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\ResumeVersionRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\EducationService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\exception\FileUploadException.java
@@ -84,6 +87,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\ProjectGalleryController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\ResumeController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\auth\ResetPasswordRequest.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ProfessionType.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\publicview\section\CertificationSectionHandler.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\security\JwtUtil.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\contact\CreateContactMessageRequest.java
@@ -93,6 +97,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\publicview\section\SectionHandler.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\ProjectRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\ExperienceRepository.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\PortfolioBlock.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\ContactMessageController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\CurrencyType.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\experience\UpdateExperienceRequest.java
@@ -116,6 +121,8 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\cer
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\SubscriptionPlanController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\UserProfile.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\education\CreateEducationRequest.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\ProfessionTaxonomyService.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\BlockType.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\FinancialCredentialRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\layout\LayoutResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\education\UpdateEducationRequest.java
@@ -125,6 +132,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publication\CreatePublicationRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\financial\PublicFinancialCredentialResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\config\WebMvcConfig.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ContentMode.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\ContactMessageRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\LayoutController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publicview\ResolvedThemeDTO.java
@@ -190,9 +198,11 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\reposit
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\ResumeDashboardApplication.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\template\TemplateResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\BlogPost.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ProfessionCategory.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\Resume.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\CertificationService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\Template.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\portfolioBlock\CreatePortfolioBlockRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\TestimonialRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\certification\UpdateCertificationRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\testimonial\CreateTestimonialRequest.java
@@ -219,6 +229,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\skill\CreateSkillRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\publicview\section\TestimonialSectionHandler.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\SkillController.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\PortfolioBlockRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\theme\ThemeResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\dashboard\DashboardResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\Subscription.java
@@ -234,6 +245,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\control
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\BlogPostService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\projectgallery\PublicProjectGalleryResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\PortfolioSectionConfigController.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\exception\CloudinaryConfigurationException.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publication\UpdatePublicationRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\SkillService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\customization\UserThemeCustomizationResponse.java
@@ -248,6 +260,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\FinancialCredentialService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\config\RequestLoggingFilter.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\service\PublicServiceOfferingResponse.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\PortfolioBlockService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publicview\PublicFinancialCredentialDTO.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\PaymentOrderRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\exhibition\UpdateExhibitionRequest.java
@@ -256,6 +269,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\exhibition\ExhibitionResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\EducationRepository.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\repository\UserThemeCustomizationRepository.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\portfolioBlock\PortfolioBlockResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\publicview\section\BlogSectionHandler.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\ServiceOfferingService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publicview\LayoutDTO.java
@@ -282,3 +296,4 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\sec
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\ResumeVersionService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\resume\PublicResumeResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ContactStatus.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\MotionPreset.java

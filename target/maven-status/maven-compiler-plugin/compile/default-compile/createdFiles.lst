@@ -24,6 +24,7 @@ com\resume\dashboard\service\ResumeVersionService.class
 com\resume\dashboard\service\TemplateService.class
 com\resume\dashboard\service\FinancialCredentialService.class
 com\resume\dashboard\exception\InvalidStateTransitionException.class
+com\resume\dashboard\entity\ContentMode.class
 com\resume\dashboard\service\SubscriptionService.class
 com\resume\dashboard\ResumeDashboardApplication.class
 com\resume\dashboard\dto\skill\UpdateSkillRequest.class
@@ -48,6 +49,7 @@ com\resume\dashboard\dto\layout\CreateLayoutRequest.class
 com\resume\dashboard\service\admin\AdminService.class
 com\resume\dashboard\controller\PublicationController.class
 com\resume\dashboard\dto\exhibition\UpdateExhibitionRequest.class
+com\resume\dashboard\service\PortfolioBlockService.class
 com\resume\dashboard\service\ExhibitionOrAwardService.class
 com\resume\dashboard\entity\SubscriptionPlan.class
 com\resume\dashboard\dto\auth\UpdateProfileRequest.class
@@ -64,6 +66,7 @@ com\resume\dashboard\entity\User.class
 com\resume\dashboard\dto\experience\UpdateExperienceRequest.class
 com\resume\dashboard\entity\PaymentOrder.class
 com\resume\dashboard\entity\SkillProficiency.class
+com\resume\dashboard\repository\PortfolioBlockRepository.class
 com\resume\dashboard\security\UserDetailsServiceImpl.class
 com\resume\dashboard\dto\projectgallery\ProjectGalleryResponse.class
 com\resume\dashboard\exception\GlobalExceptionHandler.class
@@ -91,6 +94,7 @@ com\resume\dashboard\dto\publicview\TemplateMetaDTO.class
 com\resume\dashboard\entity\ThemeBackground$TextureOverlay.class
 com\resume\dashboard\service\publicview\section\MediaAppearanceSectionHandler.class
 com\resume\dashboard\dto\section\CreatePortfolioSectionRequest.class
+com\resume\dashboard\dto\publicview\PublicPortfolioBlockDTO.class
 com\resume\dashboard\entity\Testimonial.class
 com\resume\dashboard\entity\ThemeBackground.class
 com\resume\dashboard\controller\SubscriptionPlanController.class
@@ -137,6 +141,7 @@ com\resume\dashboard\controller\PaymentController$ConfirmPaymentRequest.class
 com\resume\dashboard\exception\DuplicateEmailException.class
 com\resume\dashboard\dto\template\UpdateTemplateRequest.class
 com\resume\dashboard\service\PortfolioSectionConfigService.class
+com\resume\dashboard\entity\ProfessionType.class
 com\resume\dashboard\service\publicview\section\ProjectSectionHandler.class
 com\resume\dashboard\controller\LayoutController.class
 com\resume\dashboard\controller\ResumeVersionController$SaveVersionRequest.class
@@ -203,6 +208,7 @@ com\resume\dashboard\dto\financial\PublicFinancialCredentialResponse.class
 com\resume\dashboard\entity\VisibilityType.class
 com\resume\dashboard\service\publicview\section\TestimonialSectionHandler.class
 com\resume\dashboard\entity\ThemeTypography.class
+com\resume\dashboard\entity\PortfolioBlock.class
 com\resume\dashboard\repository\ResumeRepository.class
 com\resume\dashboard\dto\auth\LoginRequest.class
 com\resume\dashboard\controller\TestimonialController.class
@@ -212,7 +218,6 @@ com\resume\dashboard\repository\SubscriptionPlanRepository.class
 com\resume\dashboard\dto\financial\FinancialCredentialResponse.class
 com\resume\dashboard\dto\project\UpdateProjectRequest.class
 com\resume\dashboard\service\TestimonialService.class
-com\resume\dashboard\config\AdminUserSeeder.class
 com\resume\dashboard\dto\publicview\ThemeDTO.class
 com\resume\dashboard\dto\projectgallery\CreateProjectGalleryRequest.class
 com\resume\dashboard\controller\ExhibitionOrAwardController.class
@@ -241,6 +246,7 @@ com\resume\dashboard\dto\publicview\PublicSkillDTO.class
 com\resume\dashboard\dto\theme\ThemeResponse.class
 com\resume\dashboard\dto\exhibition\CreateExhibitionRequest.class
 com\resume\dashboard\dto\publicview\PublicProjectDTO.class
+com\resume\dashboard\entity\ProfessionCategory.class
 com\resume\dashboard\repository\SubscriptionRepository.class
 com\resume\dashboard\entity\LayoutStructureConfig$GridConfig.class
 com\resume\dashboard\dto\contact\ContactMessageResponse.class
@@ -265,9 +271,12 @@ com\resume\dashboard\dto\testimonial\UpdateTestimonialRequest.class
 com\resume\dashboard\dto\testimonial\CreateTestimonialRequest.class
 com\resume\dashboard\entity\Layout.class
 com\resume\dashboard\entity\Template.class
+com\resume\dashboard\entity\MotionPreset.class
 com\resume\dashboard\controller\ServiceOfferingController.class
 com\resume\dashboard\dto\section\UpdatePortfolioSectionRequest.class
 com\resume\dashboard\security\JwtUtil.class
+com\resume\dashboard\dto\portfolioBlock\PortfolioBlockResponse.class
+com\resume\dashboard\controller\PortfolioBlockController.class
 com\resume\dashboard\dto\project\CreateProjectRequest.class
 com\resume\dashboard\dto\customization\UserThemeCustomizationResponse.class
 com\resume\dashboard\dto\service\ServiceOfferingResponse.class
@@ -275,17 +284,21 @@ com\resume\dashboard\repository\UserProfileRepository.class
 com\resume\dashboard\entity\Experience.class
 com\resume\dashboard\entity\ProjectMediaType.class
 com\resume\dashboard\repository\BlogPostRepository.class
+com\resume\dashboard\entity\BlockType.class
 com\resume\dashboard\entity\Subscription.class
 com\resume\dashboard\exception\UserBlockedException.class
 com\resume\dashboard\dto\analytics\AnalyticsSummaryResponse.class
+com\resume\dashboard\dto\portfolioBlock\CreatePortfolioBlockRequest.class
 com\resume\dashboard\repository\SkillRepository.class
 com\resume\dashboard\dto\publication\PublicationResponse.class
 com\resume\dashboard\dto\blog\BlogResponse.class
 com\resume\dashboard\service\user\UserDashboardService.class
+com\resume\dashboard\service\ProfessionTaxonomyService.class
 com\resume\dashboard\dto\auth\AuthResponse.class
 com\resume\dashboard\dto\section\PortfolioSectionResponse.class
 com\resume\dashboard\controller\user\AnalyticsController.class
 com\resume\dashboard\entity\ThemeBackground$BackgroundType.class
+com\resume\dashboard\dto\portfolioBlock\UpdatePortfolioBlockRequest.class
 com\resume\dashboard\controller\UserProfileController.class
 com\resume\dashboard\dto\publication\PublicPublicationResponse.class
 com\resume\dashboard\dto\service\PublicServiceOfferingResponse.class
