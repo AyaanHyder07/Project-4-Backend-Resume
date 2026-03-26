@@ -232,6 +232,7 @@ com\resume\dashboard\controller\admin\AdminUploadController.class
 com\resume\dashboard\dto\service\UpdateServiceOfferingRequest.class
 com\resume\dashboard\exception\ResourceNotFoundException.class
 com\resume\dashboard\repository\ProjectRepository.class
+com\resume\dashboard\controller\ResumeController$ChangeTemplateRequest.class
 com\resume\dashboard\dto\media\CreateMediaAppearanceRequest.class
 com\resume\dashboard\service\EducationService.class
 com\resume\dashboard\controller\CertificationController.class

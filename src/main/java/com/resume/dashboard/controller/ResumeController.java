@@ -41,6 +41,12 @@ public class ResumeController {
         return ResponseEntity.ok(resumeService.changeTheme(userId, resumeId, request.getThemeId()));
     }
 
+    @PatchMapping("/api/resumes/{resumeId}/template")
+    public ResponseEntity<Resume> changeTemplate(@AuthenticationPrincipal String userId, @PathVariable String resumeId,
+                                                 @RequestBody ChangeTemplateRequest request) {
+        return ResponseEntity.ok(resumeService.changeTemplate(userId, resumeId, request.getTemplateId()));
+    }
+
     @PostMapping("/api/resumes/{resumeId}/submit")
     public ResponseEntity<Resume> submit(@AuthenticationPrincipal String userId, @PathVariable String resumeId) {
         return ResponseEntity.ok(resumeService.submitForApproval(userId, resumeId));
@@ -82,8 +88,17 @@ public class ResumeController {
         public void setThemeId(String themeId) { this.themeId = themeId; }
     }
 
+    public static class ChangeTemplateRequest {
+        private String templateId;
+        public String getTemplateId() { return templateId; }
+        public void setTemplateId(String templateId) { this.templateId = templateId; }
+    }
+
+
     @GetMapping("/api/resumes")
     public ResponseEntity<List<Resume>> getAllByUser(@AuthenticationPrincipal String userId) {
         return ResponseEntity.ok(resumeService.getAllByUser(userId));
     }
 }
+
+

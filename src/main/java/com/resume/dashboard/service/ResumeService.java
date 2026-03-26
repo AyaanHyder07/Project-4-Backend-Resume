@@ -184,6 +184,35 @@ public class ResumeService {
         return resumeRepository.save(resume);
     }
 
+    public Resume changeTemplate(String userId, String resumeId, String newTemplateId) {
+        Resume resume = getOwnedResume(userId, resumeId);
+        if (!subscriptionService.isTemplateAllowed(userId, newTemplateId)) {
+            throw new IllegalStateException("Your subscription plan does not allow this template. Please upgrade.");
+        }
+
+        Template template = templateRepository.findByIdAndActiveTrue(newTemplateId)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found"));
+        Layout layout = layoutRepository.findById(template.getLayoutId())
+                .orElseThrow(() -> new ResourceNotFoundException("Layout not found"));
+        Theme theme = themeRepository.findById(template.getDefaultThemeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
+        MotionPreset selectedMotion = template.getDefaultMotionPreset() != null
+                ? template.getDefaultMotionPreset()
+                : layout.getDefaultMotionPreset();
+
+        resume.setTemplateId(template.getId());
+        resume.setTemplateKey(resolveTemplateKey(template, template.getTemplateKey()));
+        resume.setTemplateVersion(template.getVersion());
+        resume.setLayoutId(layout.getId());
+        resume.setLayoutVersion(layout.getVersion());
+        resume.setThemeId(theme.getId());
+        resume.setThemeVersion(theme.getVersion());
+        resume.setMotionPreset(selectedMotion);
+        resume.setResolvedTheme(buildResolvedTheme(template, theme, selectedMotion));
+        resume.setUpdatedAt(Instant.now());
+        return resumeRepository.save(resume);
+    }
+
     public Resume submitForApproval(String userId, String resumeId) {
         Resume resume = getOwnedResume(userId, resumeId);
         if (resume.getApprovalStatus() != ApprovalStatus.DRAFT) {
@@ -283,3 +312,4 @@ public class ResumeService {
         };
     }
 }
+
