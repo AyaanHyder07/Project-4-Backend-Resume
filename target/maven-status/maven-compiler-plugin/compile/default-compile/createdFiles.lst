@@ -37,6 +37,7 @@ com\resume\dashboard\dto\userprofile\UserProfileResponse.class
 com\resume\dashboard\controller\PaymentController.class
 com\resume\dashboard\repository\ProjectGalleryRepository.class
 com\resume\dashboard\service\PublicationService.class
+com\resume\dashboard\entity\ResolvedTheme.class
 com\resume\dashboard\service\publicview\section\FinancialCredentialSectionHandler.class
 com\resume\dashboard\dto\dashboard\ResumeSummaryDTO.class
 com\resume\dashboard\dto\resume\ResumeResponse.class
@@ -70,6 +71,7 @@ com\resume\dashboard\repository\PortfolioBlockRepository.class
 com\resume\dashboard\security\UserDetailsServiceImpl.class
 com\resume\dashboard\dto\projectgallery\ProjectGalleryResponse.class
 com\resume\dashboard\exception\GlobalExceptionHandler.class
+com\resume\dashboard\entity\TemplateDefaultTheme.class
 com\resume\dashboard\service\BaseOwnershipService.class
 com\resume\dashboard\service\CertificationService.class
 com\resume\dashboard\dto\subscriptionplan\UpdateSubscriptionPlanRequest.class
@@ -127,6 +129,7 @@ com\resume\dashboard\controller\EducationController.class
 com\resume\dashboard\repository\TemplateRepository.class
 com\resume\dashboard\dto\certification\CreateCertificationRequest.class
 com\resume\dashboard\entity\LayoutStructureConfig$SectionZone.class
+com\resume\dashboard\service\ResumeService$1.class
 com\resume\dashboard\entity\Theme.class
 com\resume\dashboard\service\ProjectService.class
 com\resume\dashboard\dto\dashboard\DashboardResponse.class
@@ -220,6 +223,7 @@ com\resume\dashboard\dto\financial\FinancialCredentialResponse.class
 com\resume\dashboard\dto\project\UpdateProjectRequest.class
 com\resume\dashboard\service\TestimonialService.class
 com\resume\dashboard\dto\publicview\ThemeDTO.class
+com\resume\dashboard\dto\publicview\PublicThemeDataDTO.class
 com\resume\dashboard\dto\projectgallery\CreateProjectGalleryRequest.class
 com\resume\dashboard\controller\ExhibitionOrAwardController.class
 com\resume\dashboard\controller\TemplateController.class
@@ -259,6 +263,7 @@ com\resume\dashboard\repository\ContactMessageRepository.class
 com\resume\dashboard\dto\experience\CreateExperienceRequest.class
 com\resume\dashboard\controller\SubscriptionController.class
 com\resume\dashboard\dto\education\EducationResponse.class
+com\resume\dashboard\service\publicview\PublicPortfolioAggregatorService$1.class
 com\resume\dashboard\service\publicview\section\CertificationSectionHandler.class
 com\resume\dashboard\entity\PricingModel.class
 com\resume\dashboard\dto\media\UpdateMediaAppearanceRequest.class
@@ -292,6 +297,7 @@ com\resume\dashboard\dto\analytics\AnalyticsSummaryResponse.class
 com\resume\dashboard\dto\portfolioBlock\CreatePortfolioBlockRequest.class
 com\resume\dashboard\repository\SkillRepository.class
 com\resume\dashboard\dto\publication\PublicationResponse.class
+com\resume\dashboard\service\TemplateService$1.class
 com\resume\dashboard\dto\blog\BlogResponse.class
 com\resume\dashboard\service\user\UserDashboardService.class
 com\resume\dashboard\service\ProfessionTaxonomyService.class

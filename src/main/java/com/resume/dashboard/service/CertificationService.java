@@ -24,17 +24,14 @@ public class CertificationService {
     public CertificationService(CertificationRepository certificationRepo,
             ResumeRepository resumeRepo,
             CloudinaryService cloudinaryService) {
-this.certificationRepo = certificationRepo;
-this.resumeRepo = resumeRepo;
-this.cloudinaryService = cloudinaryService;
-}
+        this.certificationRepo = certificationRepo;
+        this.resumeRepo = resumeRepo;
+        this.cloudinaryService = cloudinaryService;
+    }
 
-    /*
-     * CREATE CERTIFICATION
-     */
     public CertificationResponse create(String userId,
             CreateCertificationRequest request,
-            MultipartFile certificateFile){
+            MultipartFile certificateFile) {
 
         Resume resume = resumeRepo.findById(request.getResumeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
@@ -55,16 +52,13 @@ this.cloudinaryService = cloudinaryService;
         cert.setId(UUID.randomUUID().toString());
         cert.setResumeId(request.getResumeId());
         cert.setTitle(request.getTitle());
-        String certUrl = null;
 
         if (certificateFile != null && !certificateFile.isEmpty()) {
-            certUrl = cloudinaryService.uploadImage(
-                    certificateFile,
-                    "resume/certifications/" + resume.getId()
+            cert.setCertificateUrl(
+                cloudinaryService.uploadDocument(certificateFile, "resume/certifications/" + resume.getId())
             );
         }
 
-        cert.setCertificateUrl(certUrl);
         cert.setDisplayOrder(nextOrder);
         cert.setCreatedAt(Instant.now());
         cert.setUpdatedAt(Instant.now());
@@ -72,9 +66,6 @@ this.cloudinaryService = cloudinaryService;
         return map(certificationRepo.save(cert));
     }
 
-    /*
-     * UPDATE CERTIFICATION
-     */
     public CertificationResponse update(String userId,
             String certificationId,
             UpdateCertificationRequest request,
@@ -92,22 +83,15 @@ this.cloudinaryService = cloudinaryService;
 
         cert.setTitle(request.getTitle());
         if (certificateFile != null && !certificateFile.isEmpty()) {
-
-            String newUrl = cloudinaryService.uploadImage(
-                    certificateFile,
-                    "resume/certifications/" + resume.getId()
+            cert.setCertificateUrl(
+                cloudinaryService.uploadDocument(certificateFile, "resume/certifications/" + resume.getId())
             );
-
-            cert.setCertificateUrl(newUrl);
         }
         cert.setUpdatedAt(Instant.now());
 
         return map(certificationRepo.save(cert));
     }
 
-    /*
-     * DELETE CERTIFICATION
-     */
     public void delete(String userId, String certificationId) {
 
         Certification cert = certificationRepo.findById(certificationId)
@@ -123,11 +107,7 @@ this.cloudinaryService = cloudinaryService;
         certificationRepo.delete(cert);
     }
 
-    /*
-     * GET ALL CERTIFICATIONS
-     */
-    public List<CertificationResponse> getByResume(String userId,
-                                                   String resumeId) {
+    public List<CertificationResponse> getByResume(String userId, String resumeId) {
 
         Resume resume = resumeRepo.findById(resumeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
@@ -143,12 +123,7 @@ this.cloudinaryService = cloudinaryService;
                 .collect(Collectors.toList());
     }
 
-    /*
-     * REORDER CERTIFICATIONS
-     */
-    public void reorder(String userId,
-                        String resumeId,
-                        List<String> orderedIds) {
+    public void reorder(String userId, String resumeId, List<String> orderedIds) {
 
         Resume resume = resumeRepo.findById(resumeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
@@ -169,11 +144,7 @@ this.cloudinaryService = cloudinaryService;
         }
     }
 
-    /*
-     * MAPPER
-     */
     private CertificationResponse map(Certification cert) {
-
         CertificationResponse res = new CertificationResponse();
         res.setId(cert.getId());
         res.setResumeId(cert.getResumeId());
@@ -182,7 +153,6 @@ this.cloudinaryService = cloudinaryService;
         res.setDisplayOrder(cert.getDisplayOrder());
         res.setCreatedAt(cert.getCreatedAt());
         res.setUpdatedAt(cert.getUpdatedAt());
-
         return res;
     }
 }

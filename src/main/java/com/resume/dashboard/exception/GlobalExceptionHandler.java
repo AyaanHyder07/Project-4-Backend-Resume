@@ -14,12 +14,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /* ================================================================
-       FIX: Was TWO handleValidation methods both mapped to
-       MethodArgumentNotValidException — Spring 6 throws
-       "Ambiguous @ExceptionHandler" and refuses to start.
-       SOLUTION: Keep ONE method only. Use WebRequest for path info.
-    ================================================================ */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(
             MethodArgumentNotValidException ex,
@@ -39,9 +33,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /* ================================================================
-       RESOURCE NOT FOUND — 404
-    ================================================================ */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(
             ResourceNotFoundException ex,
@@ -57,9 +48,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
-    /* ================================================================
-       ILLEGAL STATE — 400 (plan limit violations, invalid transitions)
-    ================================================================ */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(
             IllegalStateException ex,
@@ -75,9 +63,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /* ================================================================
-       ILLEGAL ARGUMENT — 400 (e.g. trying to buy FREE plan)
-    ================================================================ */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(
             IllegalArgumentException ex,
@@ -93,9 +78,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /* ================================================================
-       RUNTIME EXCEPTION — 500 (subscription expired, plan config missing, etc.)
-    ================================================================ */
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<Map<String, Object>> handleFileUpload(
+            FileUploadException ex,
+            WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Upload Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntime(
             RuntimeException ex,

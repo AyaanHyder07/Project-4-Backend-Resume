@@ -7,6 +7,7 @@ import com.resume.dashboard.entity.MotionPreset;
 import com.resume.dashboard.entity.PlanType;
 import com.resume.dashboard.entity.ProfessionCategory;
 import com.resume.dashboard.entity.ProfessionType;
+import com.resume.dashboard.entity.TemplateDefaultTheme;
 import com.resume.dashboard.entity.VisualMood;
 
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +20,10 @@ public class CreateTemplateRequest {
     @NotBlank(message = "Template name is required")
     @Size(max = 100)
     private String name;
+    private String templateKey;
+    private String renderFamily;
+    private String variantKey;
+    private String profession;
     @Size(max = 500)
     private String description;
     @Size(max = 100, message = "Tagline must be 100 characters or less")
@@ -37,24 +42,39 @@ public class CreateTemplateRequest {
     private List<String> professionTags;
     private List<ProfessionCategory> professionCategories;
     private List<ProfessionType> professionTypes;
+    private TemplateDefaultTheme defaultTheme;
     @NotNull(message = "Primary mood is required")
     private VisualMood primaryMood;
     private List<ContentMode> supportedContentModes;
     @NotNull(message = "Supported sections are required")
     @Size(min = 1)
     private List<String> supportedSections;
+    private List<String> enabledSections;
+    private List<String> sectionOrder;
     private List<String> requiredSections;
     private List<BlockType> supportedBlockTypes;
     private List<BlockType> recommendedBlockTypes;
     private List<MotionPreset> allowedMotionPresets;
     private MotionPreset defaultMotionPreset;
+    private String navStyle;
     private Boolean featured;
     private Boolean isNew;
     private Integer premiumRank;
     private Boolean globallySelectable;
+    private Boolean systemTemplate;
+    private Boolean editableByAdmin;
+    private Boolean supportsPremiumCustomization;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getTemplateKey() { return templateKey; }
+    public void setTemplateKey(String templateKey) { this.templateKey = templateKey; }
+    public String getRenderFamily() { return renderFamily; }
+    public void setRenderFamily(String renderFamily) { this.renderFamily = renderFamily; }
+    public String getVariantKey() { return variantKey; }
+    public void setVariantKey(String variantKey) { this.variantKey = variantKey; }
+    public String getProfession() { return profession; }
+    public void setProfession(String profession) { this.profession = profession; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public String getTagline() { return tagline; }
@@ -77,12 +97,18 @@ public class CreateTemplateRequest {
     public void setProfessionCategories(List<ProfessionCategory> professionCategories) { this.professionCategories = professionCategories; }
     public List<ProfessionType> getProfessionTypes() { return professionTypes; }
     public void setProfessionTypes(List<ProfessionType> professionTypes) { this.professionTypes = professionTypes; }
+    public TemplateDefaultTheme getDefaultTheme() { return defaultTheme; }
+    public void setDefaultTheme(TemplateDefaultTheme defaultTheme) { this.defaultTheme = defaultTheme; }
     public VisualMood getPrimaryMood() { return primaryMood; }
     public void setPrimaryMood(VisualMood primaryMood) { this.primaryMood = primaryMood; }
     public List<ContentMode> getSupportedContentModes() { return supportedContentModes; }
     public void setSupportedContentModes(List<ContentMode> supportedContentModes) { this.supportedContentModes = supportedContentModes; }
     public List<String> getSupportedSections() { return supportedSections; }
     public void setSupportedSections(List<String> supportedSections) { this.supportedSections = supportedSections; }
+    public List<String> getEnabledSections() { return enabledSections; }
+    public void setEnabledSections(List<String> enabledSections) { this.enabledSections = enabledSections; }
+    public List<String> getSectionOrder() { return sectionOrder; }
+    public void setSectionOrder(List<String> sectionOrder) { this.sectionOrder = sectionOrder; }
     public List<String> getRequiredSections() { return requiredSections; }
     public void setRequiredSections(List<String> requiredSections) { this.requiredSections = requiredSections; }
     public List<BlockType> getSupportedBlockTypes() { return supportedBlockTypes; }
@@ -93,6 +119,8 @@ public class CreateTemplateRequest {
     public void setAllowedMotionPresets(List<MotionPreset> allowedMotionPresets) { this.allowedMotionPresets = allowedMotionPresets; }
     public MotionPreset getDefaultMotionPreset() { return defaultMotionPreset; }
     public void setDefaultMotionPreset(MotionPreset defaultMotionPreset) { this.defaultMotionPreset = defaultMotionPreset; }
+    public String getNavStyle() { return navStyle; }
+    public void setNavStyle(String navStyle) { this.navStyle = navStyle; }
     public Boolean getFeatured() { return featured; }
     public void setFeatured(Boolean featured) { this.featured = featured; }
     public Boolean getIsNew() { return isNew; }
@@ -101,4 +129,10 @@ public class CreateTemplateRequest {
     public void setPremiumRank(Integer premiumRank) { this.premiumRank = premiumRank; }
     public Boolean getGloballySelectable() { return globallySelectable; }
     public void setGloballySelectable(Boolean globallySelectable) { this.globallySelectable = globallySelectable; }
+    public Boolean getSystemTemplate() { return systemTemplate; }
+    public void setSystemTemplate(Boolean systemTemplate) { this.systemTemplate = systemTemplate; }
+    public Boolean getEditableByAdmin() { return editableByAdmin; }
+    public void setEditableByAdmin(Boolean editableByAdmin) { this.editableByAdmin = editableByAdmin; }
+    public Boolean getSupportsPremiumCustomization() { return supportsPremiumCustomization; }
+    public void setSupportsPremiumCustomization(Boolean supportsPremiumCustomization) { this.supportsPremiumCustomization = supportsPremiumCustomization; }
 }

@@ -24,17 +24,14 @@ public class FinancialCredentialService {
     public FinancialCredentialService(FinancialCredentialRepository repo,
             ResumeRepository resumeRepo,
             CloudinaryService cloudinaryService) {
-this.repo = repo;
-this.resumeRepo = resumeRepo;
-this.cloudinaryService = cloudinaryService;
-}
+        this.repo = repo;
+        this.resumeRepo = resumeRepo;
+        this.cloudinaryService = cloudinaryService;
+    }
 
-    /*
-     * CREATE
-     */
     public FinancialCredentialResponse create(String userId,
             CreateFinancialCredentialRequest request,
-            MultipartFile proofFile){
+            MultipartFile proofFile) {
 
         Resume resume = resumeRepo.findById(request.getResumeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
@@ -65,14 +62,10 @@ this.cloudinaryService = cloudinaryService;
         entity.setStatus(calculateStatus(request.getValidTill()));
         entity.setRegion(request.getRegion());
         entity.setVisibility(request.getVisibility() != null ? request.getVisibility() : VisibilityType.PUBLIC);
-        String proofUrl = request.getVerificationUrl(); // fallback if frontend sends external URL
 
+        String proofUrl = request.getVerificationUrl();
         if (proofFile != null && !proofFile.isEmpty()) {
-
-            proofUrl = cloudinaryService.uploadImage(
-                    proofFile,
-                    "resume/financial/" + resume.getId()
-            );
+            proofUrl = cloudinaryService.uploadDocument(proofFile, "resume/financial/" + resume.getId());
         }
 
         entity.setVerificationUrl(proofUrl);
@@ -84,9 +77,6 @@ this.cloudinaryService = cloudinaryService;
         return map(repo.save(entity));
     }
 
-    /*
-     * UPDATE
-     */
     public FinancialCredentialResponse update(String userId,
             String id,
             UpdateFinancialCredentialRequest request,
@@ -111,35 +101,26 @@ this.cloudinaryService = cloudinaryService;
         entity.setValidTill(request.getValidTill());
 
         if (request.getStatus() != null) {
-            entity.setStatus(
-                    CredentialStatus.valueOf(request.getStatus().toUpperCase())
-            );
+            entity.setStatus(CredentialStatus.valueOf(request.getStatus().toUpperCase()));
         } else {
             entity.setStatus(calculateStatus(request.getValidTill()));
         }
 
         entity.setRegion(request.getRegion());
         entity.setVisibility(request.getVisibility() != null ? request.getVisibility() : VisibilityType.PUBLIC);
+
         if (proofFile != null && !proofFile.isEmpty()) {
-
-            String newUrl = cloudinaryService.uploadImage(
-                    proofFile,
-                    "resume/financial/" + resume.getId()
+            entity.setVerificationUrl(
+                cloudinaryService.uploadDocument(proofFile, "resume/financial/" + resume.getId())
             );
-
-            entity.setVerificationUrl(newUrl);
         } else if (request.getVerificationUrl() != null) {
-
             entity.setVerificationUrl(request.getVerificationUrl());
         }
-        entity.setUpdatedAt(Instant.now());
 
+        entity.setUpdatedAt(Instant.now());
         return map(repo.save(entity));
     }
 
-    /*
-     * DELETE
-     */
     public void delete(String userId, String id) {
 
         FinancialCredential entity = repo.findById(id)
@@ -149,15 +130,10 @@ this.cloudinaryService = cloudinaryService;
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         validateOwnership(resume, userId);
-
         repo.delete(entity);
     }
 
-    /*
-     * GET ALL (PRIVATE)
-     */
-    public List<FinancialCredentialResponse> getByResume(String userId,
-                                                         String resumeId) {
+    public List<FinancialCredentialResponse> getByResume(String userId, String resumeId) {
 
         Resume resume = resumeRepo.findById(resumeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
@@ -170,9 +146,6 @@ this.cloudinaryService = cloudinaryService;
                 .collect(Collectors.toList());
     }
 
-    /*
-     * GET PUBLIC (Only ACTIVE)
-     */
     public List<PublicFinancialCredentialResponse> getPublic(String resumeId) {
 
         return repo.findByResumeIdOrderByDisplayOrderAsc(resumeId)
@@ -182,12 +155,7 @@ this.cloudinaryService = cloudinaryService;
                 .collect(Collectors.toList());
     }
 
-    /*
-     * REORDER
-     */
-    public void reorder(String userId,
-                        String resumeId,
-                        List<String> orderedIds) {
+    public void reorder(String userId, String resumeId, List<String> orderedIds) {
 
         Resume resume = resumeRepo.findById(resumeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
@@ -195,7 +163,6 @@ this.cloudinaryService = cloudinaryService;
         validateOwnership(resume, userId);
 
         int order = 1;
-
         for (String id : orderedIds) {
             FinancialCredential entity = repo.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Credential not found"));
@@ -206,40 +173,29 @@ this.cloudinaryService = cloudinaryService;
         }
     }
 
-    /*
-     * STATUS AUTO-CALCULATION
-     */
     private CredentialStatus calculateStatus(LocalDate validTill) {
-
         if (validTill == null) {
             return CredentialStatus.ACTIVE;
         }
-
         if (validTill.isBefore(LocalDate.now())) {
             return CredentialStatus.EXPIRED;
         }
-
         return CredentialStatus.ACTIVE;
     }
 
-    private void validateDates(LocalDate issueDate,
-                               LocalDate validTill) {
-
-        if (issueDate != null && validTill != null &&
-                validTill.isBefore(issueDate)) {
+    private void validateDates(LocalDate issueDate, LocalDate validTill) {
+        if (issueDate != null && validTill != null && validTill.isBefore(issueDate)) {
             throw new IllegalArgumentException("Valid till cannot be before issue date");
         }
     }
 
     private void validateOwnership(Resume resume, String userId) {
-
         if (!resume.getUserId().equals(userId)) {
             throw new IllegalStateException("Unauthorized");
         }
     }
 
     private FinancialCredentialResponse map(FinancialCredential entity) {
-
         FinancialCredentialResponse res = new FinancialCredentialResponse();
         res.setId(entity.getId());
         res.setResumeId(entity.getResumeId());
@@ -256,15 +212,11 @@ this.cloudinaryService = cloudinaryService;
         res.setDisplayOrder(entity.getDisplayOrder());
         res.setCreatedAt(entity.getCreatedAt());
         res.setUpdatedAt(entity.getUpdatedAt());
-
         return res;
     }
 
     private PublicFinancialCredentialResponse mapPublic(FinancialCredential entity) {
-
-        PublicFinancialCredentialResponse res =
-                new PublicFinancialCredentialResponse();
-
+        PublicFinancialCredentialResponse res = new PublicFinancialCredentialResponse();
         res.setCredentialType(entity.getCredentialType().name());
         res.setCertificationName(entity.getCertificationName());
         res.setIssuingAuthority(entity.getIssuingAuthority());
@@ -272,7 +224,6 @@ this.cloudinaryService = cloudinaryService;
         res.setRegion(entity.getRegion());
         res.setVerificationUrl(entity.getVerificationUrl());
         res.setVerified(entity.isVerified());
-
         return res;
     }
 }

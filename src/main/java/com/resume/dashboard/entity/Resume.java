@@ -24,12 +24,15 @@ public class Resume {
     private String slug;
 
     private String templateId;
+    private String templateKey;
     private int templateVersion;
     private String layoutId;
     private int layoutVersion;
     private String themeId;
     private int themeVersion;
     private MotionPreset motionPreset;
+    private ResolvedTheme resolvedTheme;
+    private String rejectionReason;
 
     private boolean published;
     private VisibilityType visibility;
@@ -54,6 +57,8 @@ public class Resume {
     public void setSlug(String slug) { this.slug = slug; }
     public String getTemplateId() { return templateId; }
     public void setTemplateId(String templateId) { this.templateId = templateId; }
+    public String getTemplateKey() { return templateKey; }
+    public void setTemplateKey(String templateKey) { this.templateKey = templateKey; }
     public int getTemplateVersion() { return templateVersion; }
     public void setTemplateVersion(int templateVersion) { this.templateVersion = templateVersion; }
     public String getLayoutId() { return layoutId; }
@@ -66,6 +71,10 @@ public class Resume {
     public void setThemeVersion(int themeVersion) { this.themeVersion = themeVersion; }
     public MotionPreset getMotionPreset() { return motionPreset; }
     public void setMotionPreset(MotionPreset motionPreset) { this.motionPreset = motionPreset; }
+    public ResolvedTheme getResolvedTheme() { return resolvedTheme; }
+    public void setResolvedTheme(ResolvedTheme resolvedTheme) { this.resolvedTheme = resolvedTheme; }
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
     public boolean isPublished() { return published; }
     public void setPublished(boolean published) { this.published = published; }
     public VisibilityType getVisibility() { return visibility; }

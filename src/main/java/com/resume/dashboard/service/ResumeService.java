@@ -2,6 +2,7 @@ package com.resume.dashboard.service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,9 +12,12 @@ import com.resume.dashboard.entity.ApprovalStatus;
 import com.resume.dashboard.entity.Layout;
 import com.resume.dashboard.entity.MotionPreset;
 import com.resume.dashboard.entity.ProfessionType;
+import com.resume.dashboard.entity.ResolvedTheme;
 import com.resume.dashboard.entity.Resume;
 import com.resume.dashboard.entity.Template;
+import com.resume.dashboard.entity.TemplateDefaultTheme;
 import com.resume.dashboard.entity.Theme;
+import com.resume.dashboard.entity.ThemeEffects;
 import com.resume.dashboard.entity.User;
 import com.resume.dashboard.entity.VisibilityType;
 import com.resume.dashboard.exception.ResourceNotFoundException;
@@ -77,7 +81,16 @@ public class ResumeService {
         Layout layout = layoutRepository.findById(template.getLayoutId())
                 .orElseThrow(() -> new ResourceNotFoundException("Layout not found"));
 
-        String themeId = request.getThemeOverrideId() != null ? request.getThemeOverrideId() : template.getDefaultThemeId();
+        String themeId = template.getDefaultThemeId();
+        if (request.getThemeOverrideId() != null && !request.getThemeOverrideId().isBlank()) {
+            try {
+                subscriptionService.validateThemeCustomization(userId);
+                themeId = request.getThemeOverrideId();
+            } catch (RuntimeException ignored) {
+                themeId = template.getDefaultThemeId();
+            }
+        }
+
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
 
@@ -92,15 +105,18 @@ public class ResumeService {
         resume.setProfessionType(professionType.name());
         resume.setProfessionCategory(professionType.getCategory());
         resume.setTemplateId(template.getId());
+        resume.setTemplateKey(resolveTemplateKey(template, request.getTemplateKey()));
         resume.setTemplateVersion(template.getVersion());
         resume.setLayoutId(layout.getId());
         resume.setLayoutVersion(layout.getVersion());
         resume.setThemeId(theme.getId());
         resume.setThemeVersion(theme.getVersion());
         resume.setMotionPreset(selectedMotion);
+        resume.setResolvedTheme(buildResolvedTheme(template, theme, selectedMotion));
         resume.setVisibility(VisibilityType.PRIVATE);
         resume.setPublished(false);
         resume.setApprovalStatus(ApprovalStatus.DRAFT);
+        resume.setRejectionReason(null);
         resume.setVersion(1);
         resume.setViewCount(0L);
         resume.setContent(request.getContent());
@@ -163,6 +179,7 @@ public class ResumeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
         resume.setThemeId(theme.getId());
         resume.setThemeVersion(theme.getVersion());
+        resume.setResolvedTheme(buildResolvedTheme(null, theme, resume.getMotionPreset()));
         resume.setUpdatedAt(Instant.now());
         return resumeRepository.save(resume);
     }
@@ -173,6 +190,7 @@ public class ResumeService {
             throw new IllegalStateException("Only draft resumes can be submitted");
         }
         resume.setApprovalStatus(ApprovalStatus.PENDING);
+        resume.setRejectionReason(null);
         resume.setUpdatedAt(Instant.now());
         return resumeRepository.save(resume);
     }
@@ -217,5 +235,51 @@ public class ResumeService {
 
     public List<Resume> getAllByUser(String userId) {
         return resumeRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    private String resolveTemplateKey(Template template, String requestTemplateKey) {
+        if (template.getTemplateKey() != null && !template.getTemplateKey().isBlank()) {
+            return template.getTemplateKey();
+        }
+        if (requestTemplateKey != null && !requestTemplateKey.isBlank()) {
+            return requestTemplateKey.trim().toUpperCase(Locale.ROOT);
+        }
+        return template.getName() == null ? null : template.getName()
+                .trim()
+                .toUpperCase(Locale.ROOT)
+                .replaceAll("[^A-Z0-9]+", "_")
+                .replaceAll("^_+|_+$", "");
+    }
+
+    private ResolvedTheme buildResolvedTheme(Template template, Theme theme, MotionPreset motionPreset) {
+        TemplateDefaultTheme templateTheme = template != null ? template.getDefaultTheme() : null;
+        ResolvedTheme value = new ResolvedTheme();
+        value.setPrimaryColor(templateTheme != null && templateTheme.getPrimaryColor() != null ? templateTheme.getPrimaryColor() : theme.getColorPalette() != null ? theme.getColorPalette().getPrimary() : null);
+        value.setAccentColor(templateTheme != null && templateTheme.getAccentColor() != null ? templateTheme.getAccentColor() : theme.getColorPalette() != null ? theme.getColorPalette().getAccent() : null);
+        value.setBackgroundColor(templateTheme != null && templateTheme.getBackgroundColor() != null ? templateTheme.getBackgroundColor() : theme.getColorPalette() != null ? theme.getColorPalette().getPageBackground() : null);
+        value.setTextColor(templateTheme != null && templateTheme.getTextColor() != null ? templateTheme.getTextColor() : theme.getColorPalette() != null ? theme.getColorPalette().getTextPrimary() : null);
+        value.setFontFamily(templateTheme != null && templateTheme.getFontFamily() != null ? templateTheme.getFontFamily() : theme.getTypography() != null ? (theme.getTypography().getBodyFont() != null ? theme.getTypography().getBodyFont() : theme.getTypography().getHeadingFont()) : null);
+        value.setBorderRadius(templateTheme != null && templateTheme.getBorderRadius() != null ? templateTheme.getBorderRadius() : mapBorderRadius(theme.getEffects()));
+        value.setMotionLevel(templateTheme != null && templateTheme.getMotionLevel() != null ? templateTheme.getMotionLevel() : mapMotionLevel(motionPreset));
+        return value;
+    }
+
+    private String mapBorderRadius(ThemeEffects effects) {
+        String radius = effects != null ? effects.getCardBorderRadius() : null;
+        if (radius == null || radius.isBlank()) return "sm";
+        if (radius.contains("0")) return "none";
+        if (radius.contains("24") || radius.contains("22") || radius.contains("20")) return "lg";
+        if (radius.contains("18") || radius.contains("16") || radius.contains("14")) return "md";
+        return "sm";
+    }
+
+    private String mapMotionLevel(MotionPreset motionPreset) {
+        if (motionPreset == null) return "subtle";
+        return switch (motionPreset) {
+            case NONE -> "none";
+            case SUBTLE, EDITORIAL -> "subtle";
+            case PLAYFUL, PARALLAX, SLIDESHOW -> "moderate";
+            case CINEMATIC, IMMERSIVE -> "rich";
+        };
     }
 }

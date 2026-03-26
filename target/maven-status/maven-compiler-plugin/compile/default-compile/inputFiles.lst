@@ -44,6 +44,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\LayoutStructureConfig.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\Education.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\template\UpdateTemplateRequest.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\publicview\PublicThemeDataDTO.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service\CloudinaryService.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\userprofile\UpdateUserProfileRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ExhibitionOrAward.java
@@ -75,6 +76,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\service
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\exception\FileUploadException.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\PublicationController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\template\CreateTemplateRequest.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\TemplateDefaultTheme.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\analytics\AnalyticsSummaryResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\blog\UpdateBlogRequest.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\financial\CreateFinancialCredentialRequest.java
@@ -163,6 +165,7 @@ S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ProjectGallery.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\PaymentController.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\controller\ServiceOfferingController.java
+S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ResolvedTheme.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\dto\auth\AuthResponse.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\Layout.java
 S:\project-4\Project-4-Backend-Resume\src\main\java\com\resume\dashboard\entity\ResumeVersion.java

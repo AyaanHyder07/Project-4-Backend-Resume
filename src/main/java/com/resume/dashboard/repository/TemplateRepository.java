@@ -18,8 +18,10 @@ public interface TemplateRepository extends MongoRepository<Template, String> {
     List<Template> findByProfessionTagsContainingAndActiveTrue(String profession);
 
     Optional<Template> findByIdAndActiveTrue(String id);
+    Optional<Template> findByTemplateKeyIgnoreCaseAndActiveTrue(String templateKey);
 
     boolean existsByNameIgnoreCase(String name);
+    boolean existsByTemplateKeyIgnoreCase(String templateKey);
     List<Template> findByTargetAudiencesContainingAndActiveTrue(LayoutAudience audience);
     List<Template> findByPrimaryMoodAndActiveTrue(VisualMood mood);
 }

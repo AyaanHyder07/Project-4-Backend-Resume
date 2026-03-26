@@ -18,6 +18,7 @@ public class CreateResumeRequest {
     private VisibilityType visibility;
     private Map<String, Object> content;
     private MotionPreset motionPreset;
+    private String templateKey;
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -33,4 +34,6 @@ public class CreateResumeRequest {
     public void setContent(Map<String, Object> content) { this.content = content; }
     public MotionPreset getMotionPreset() { return motionPreset; }
     public void setMotionPreset(MotionPreset motionPreset) { this.motionPreset = motionPreset; }
+    public String getTemplateKey() { return templateKey; }
+    public void setTemplateKey(String templateKey) { this.templateKey = templateKey; }
 }
