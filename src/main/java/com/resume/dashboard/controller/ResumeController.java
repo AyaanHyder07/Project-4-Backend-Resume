@@ -1,14 +1,14 @@
 package com.resume.dashboard.controller;
 
-import java.util.List;
-
+import com.resume.dashboard.dto.resume.CreateResumeRequest;
+import com.resume.dashboard.entity.Resume;
+import com.resume.dashboard.service.ResumeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.resume.dashboard.dto.resume.CreateResumeRequest;
-import com.resume.dashboard.entity.Resume;
-import com.resume.dashboard.service.ResumeService;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ResumeController {
@@ -30,21 +30,33 @@ public class ResumeController {
     }
 
     @PatchMapping("/api/resumes/{resumeId}/meta")
-    public ResponseEntity<Resume> updateMeta(@AuthenticationPrincipal String userId, @PathVariable String resumeId,
-                                             @RequestBody UpdateMetaRequest request) {
+    public ResponseEntity<Resume> updateMeta(@AuthenticationPrincipal String userId, @PathVariable String resumeId, @RequestBody UpdateMetaRequest request) {
         return ResponseEntity.ok(resumeService.updateMeta(userId, resumeId, request.getTitle(), request.getProfessionType()));
     }
 
     @PatchMapping("/api/resumes/{resumeId}/theme")
-    public ResponseEntity<Resume> changeTheme(@AuthenticationPrincipal String userId, @PathVariable String resumeId,
-                                              @RequestBody ChangeThemeRequest request) {
+    public ResponseEntity<Resume> changeTheme(@AuthenticationPrincipal String userId, @PathVariable String resumeId, @RequestBody ChangeThemeRequest request) {
         return ResponseEntity.ok(resumeService.changeTheme(userId, resumeId, request.getThemeId()));
     }
 
     @PatchMapping("/api/resumes/{resumeId}/template")
-    public ResponseEntity<Resume> changeTemplate(@AuthenticationPrincipal String userId, @PathVariable String resumeId,
-                                                 @RequestBody ChangeTemplateRequest request) {
+    public ResponseEntity<Resume> changeTemplate(@AuthenticationPrincipal String userId, @PathVariable String resumeId, @RequestBody ChangeTemplateRequest request) {
         return ResponseEntity.ok(resumeService.changeTemplate(userId, resumeId, request.getTemplateId()));
+    }
+
+    @GetMapping("/api/resumes/{resumeId}/slug/availability")
+    public ResponseEntity<Map<String, Object>> checkSlugAvailability(@AuthenticationPrincipal String userId,
+                                                                     @PathVariable String resumeId,
+                                                                     @RequestParam String slug) {
+        boolean available = resumeService.isSlugAvailable(userId, resumeId, slug);
+        return ResponseEntity.ok(Map.of("available", available));
+    }
+
+    @PatchMapping("/api/resumes/{resumeId}/slug")
+    public ResponseEntity<Resume> updateSlug(@AuthenticationPrincipal String userId,
+                                             @PathVariable String resumeId,
+                                             @RequestBody UpdateSlugRequest request) {
+        return ResponseEntity.ok(resumeService.updateSlug(userId, resumeId, request.getSlug()));
     }
 
     @PostMapping("/api/resumes/{resumeId}/submit")
@@ -73,6 +85,11 @@ public class ResumeController {
         return ResponseEntity.ok(resumeService.getPublicBySlug(slug));
     }
 
+    @GetMapping("/api/resumes")
+    public ResponseEntity<List<Resume>> getAllByUser(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(resumeService.getAllByUser(userId));
+    }
+
     public static class UpdateMetaRequest {
         private String title;
         private String professionType;
@@ -94,11 +111,9 @@ public class ResumeController {
         public void setTemplateId(String templateId) { this.templateId = templateId; }
     }
 
-
-    @GetMapping("/api/resumes")
-    public ResponseEntity<List<Resume>> getAllByUser(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(resumeService.getAllByUser(userId));
+    public static class UpdateSlugRequest {
+        private String slug;
+        public String getSlug() { return slug; }
+        public void setSlug(String slug) { this.slug = slug; }
     }
 }
-
-

@@ -147,13 +147,12 @@ public class ResumeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String baseSlug = user.getUsername().toLowerCase();
-        String finalSlug = publishedCount == 0 ? baseSlug : baseSlug + "-v" + (publishedCount + 1);
+        String finalSlug = (resume.getSlug() != null && !resume.getSlug().isBlank())
+                ? normalizeSlugCandidate(resume.getSlug())
+                : generateDefaultSlug(user.getUsername(), publishedCount);
 
-        int counter = (int) publishedCount + 1;
-        while (resumeRepository.existsBySlug(finalSlug)) {
-            counter++;
-            finalSlug = baseSlug + "-v" + counter;
+        if (resumeRepository.existsBySlugAndIdNot(finalSlug, resume.getId())) {
+            throw new IllegalStateException("That public URL is not available. Please choose another slug.");
         }
 
         resume.setSlug(finalSlug);
@@ -186,6 +185,7 @@ public class ResumeService {
 
     public Resume changeTemplate(String userId, String resumeId, String newTemplateId) {
         Resume resume = getOwnedResume(userId, resumeId);
+        subscriptionService.validateTemplateChange(userId);
         if (!subscriptionService.isTemplateAllowed(userId, newTemplateId)) {
             throw new IllegalStateException("Your subscription plan does not allow this template. Please upgrade.");
         }
@@ -234,6 +234,24 @@ public class ResumeService {
 
     public Resume getByIdForOwner(String userId, String resumeId) {
         return getOwnedResume(userId, resumeId);
+    }
+
+    public boolean isSlugAvailable(String userId, String resumeId, String slug) {
+        getOwnedResume(userId, resumeId);
+        String normalized = normalizeSlugCandidate(slug);
+        return !resumeRepository.existsBySlugAndIdNot(normalized, resumeId);
+    }
+
+    public Resume updateSlug(String userId, String resumeId, String requestedSlug) {
+        Resume resume = getOwnedResume(userId, resumeId);
+        subscriptionService.validateCustomSlug(userId);
+        String normalized = normalizeSlugCandidate(requestedSlug);
+        if (resumeRepository.existsBySlugAndIdNot(normalized, resume.getId())) {
+            throw new IllegalStateException("That public URL is not available. Please choose another slug.");
+        }
+        resume.setSlug(normalized);
+        resume.setUpdatedAt(Instant.now());
+        return resumeRepository.save(resume);
     }
 
     public Resume getPublicBySlug(String slug) {
@@ -311,5 +329,30 @@ public class ResumeService {
             case CINEMATIC, IMMERSIVE -> "rich";
         };
     }
+
+    private String normalizeSlugCandidate(String slug) {
+        String normalized = slug == null ? "" : slug.trim().toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9-]+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-+|-+$", "");
+        if (normalized.length() < 3 || normalized.length() > 40) {
+            throw new IllegalArgumentException("Public URL must be 3-40 characters using letters, numbers, or hyphens.");
+        }
+        return normalized;
+    }
+
+    private String generateDefaultSlug(String username, long publishedCount) {
+        String baseSlug = normalizeSlugCandidate(username);
+        String finalSlug = publishedCount == 0 ? baseSlug : baseSlug + "-v" + (publishedCount + 1);
+        int counter = (int) publishedCount + 1;
+        while (resumeRepository.existsBySlug(finalSlug)) {
+            counter++;
+            finalSlug = baseSlug + "-v" + counter;
+        }
+        return finalSlug;
+    }
 }
+
+
+
 

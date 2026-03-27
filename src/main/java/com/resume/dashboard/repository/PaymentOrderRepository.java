@@ -13,6 +13,7 @@ public interface PaymentOrderRepository extends MongoRepository<PaymentOrder, St
 
     List<PaymentOrder> findByUserIdOrderByCreatedAtDesc(String userId);
 
-    // Prevents duplicate pending orders for the same user
+    List<PaymentOrder> findAllByOrderByCreatedAtDesc();
+
     boolean existsByUserIdAndStatus(String userId, PaymentStatus status);
 }

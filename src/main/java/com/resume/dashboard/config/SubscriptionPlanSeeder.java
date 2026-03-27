@@ -3,7 +3,6 @@ package com.resume.dashboard.config;
 import com.resume.dashboard.entity.PlanType;
 import com.resume.dashboard.entity.SubscriptionPlan;
 import com.resume.dashboard.repository.SubscriptionPlanRepository;
-
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -11,16 +10,6 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * SubscriptionPlanSeeder
- *
- * Runs once on startup. If the subscription_plans collection is empty,
- * seeds the 4 default plan records (FREE, BASIC, PRO, PREMIUM).
- *
- * After seeding, admin can update prices/limits via:
- *   PUT /api/admin/plans/{planType}
- * without touching code.
- */
 @Component
 public class SubscriptionPlanSeeder implements ApplicationRunner {
 
@@ -32,89 +21,40 @@ public class SubscriptionPlanSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-
         if (planRepository.count() > 0) {
-            return; // Already seeded — skip
+            return;
         }
 
-        planRepository.save(buildPlan(
-                PlanType.FREE,
-                "Free",
-                "Get started with the basics",
-                0, 0,
-                "₹0", "₹0",
-                1, 0, false, false,
-                false, true, 0
-        ));
-
-        planRepository.save(buildPlan(
-                PlanType.BASIC,
-                "Basic",
-                "Perfect for job seekers",
-                9900, 99000,         // ₹99/mo, ₹990/yr
-                "₹99/mo", "₹990/yr",
-                1, 1, false, false,
-                false, true, 1
-        ));
-
-        planRepository.save(buildPlan(
-                PlanType.PRO,
-                "Pro",
-                "For professionals who want more",
-                19900, 199000,       // ₹199/mo, ₹1990/yr
-                "₹199/mo", "₹1990/yr",
-                2, 1, true, true,
-                true, true, 2       // isPopular = true
-        ));
-
-        planRepository.save(buildPlan(
-                PlanType.PREMIUM,
-                "Premium",
-                "Everything, unlimited",
-                39900, 399000,       // ₹399/mo, ₹3990/yr
-                "₹399/mo", "₹3990/yr",
-                3, 2, true, true,
-                false, true, 3
-        ));
-
-        System.out.println("[SubscriptionPlanSeeder] Seeded 4 subscription plans.");
+        planRepository.save(buildPlan(PlanType.FREE, "Free Trial", "One portfolio draft for 7 days. Free can only be used once.", 0, 0, "?0", "?0", 1, 0, false, false, false, false, true, 7, false, true, 0));
+        planRepository.save(buildPlan(PlanType.BASIC, "Basic", "One portfolio, one public link, limited templates.", 19900, 199000, "?199/mo", "?1990/yr", 1, 1, false, false, false, false, false, null, false, true, 1));
+        planRepository.save(buildPlan(PlanType.PRO, "Pro", "Everything in Basic plus template switching and custom slugs.", 39900, 399000, "?399/mo", "?3990/yr", 1, 1, true, false, true, true, false, null, true, true, 2));
+        planRepository.save(buildPlan(PlanType.PREMIUM, "Premium", "Everything in Pro plus full public page customization.", 69900, 699000, "?699/mo", "?6990/yr", 1, 1, true, true, true, true, false, null, false, true, 3));
     }
 
-    private SubscriptionPlan buildPlan(
-            PlanType planType,
-            String displayName,
-            String description,
-            long priceMonthly,
-            long priceYearly,
-            String displayMonthly,
-            String displayYearly,
-            int resumeLimit,
-            int publicLinkLimit,
-            boolean versioning,
-            boolean themeCustomization,
-            boolean isPopular,
-            boolean isActive,
-            int displayOrder) {
-
-        SubscriptionPlan p = new SubscriptionPlan();
-        p.setId(UUID.randomUUID().toString());
-        p.setPlanType(planType);
-        p.setDisplayName(displayName);
-        p.setDescription(description);
-        p.setPriceMonthlyInSmallestUnit(priceMonthly);
-        p.setPriceYearlyInSmallestUnit(priceYearly);
-        p.setCurrency("INR");
-        p.setDisplayPriceMonthly(displayMonthly);
-        p.setDisplayPriceYearly(displayYearly);
-        p.setResumeLimit(resumeLimit);
-        p.setPublicLinkLimit(publicLinkLimit);
-        p.setVersioningEnabled(versioning);
-        p.setThemeCustomizationEnabled(themeCustomization);
-        p.setPopular(isPopular);
-        p.setActive(isActive);
-        p.setDisplayOrder(displayOrder);
-        p.setCreatedAt(Instant.now());
-        p.setUpdatedAt(Instant.now());
-        return p;
+    private SubscriptionPlan buildPlan(PlanType planType, String displayName, String description, long priceMonthly, long priceYearly, String displayMonthly, String displayYearly, int resumeLimit, int publicLinkLimit, boolean versioning, boolean themeCustomization, boolean templateChange, boolean customSlugEnabled, boolean oneTimeOnly, Integer trialDurationDays, boolean isPopular, boolean isActive, int displayOrder) {
+        SubscriptionPlan plan = new SubscriptionPlan();
+        plan.setId(UUID.randomUUID().toString());
+        plan.setPlanType(planType);
+        plan.setDisplayName(displayName);
+        plan.setDescription(description);
+        plan.setPriceMonthlyInSmallestUnit(priceMonthly);
+        plan.setPriceYearlyInSmallestUnit(priceYearly);
+        plan.setCurrency("INR");
+        plan.setDisplayPriceMonthly(displayMonthly);
+        plan.setDisplayPriceYearly(displayYearly);
+        plan.setResumeLimit(resumeLimit);
+        plan.setPublicLinkLimit(publicLinkLimit);
+        plan.setVersioningEnabled(versioning);
+        plan.setThemeCustomizationEnabled(themeCustomization);
+        plan.setTemplateChangeEnabled(templateChange);
+        plan.setCustomSlugEnabled(customSlugEnabled);
+        plan.setOneTimeOnly(oneTimeOnly);
+        plan.setTrialDurationDays(trialDurationDays);
+        plan.setPopular(isPopular);
+        plan.setActive(isActive);
+        plan.setDisplayOrder(displayOrder);
+        plan.setCreatedAt(Instant.now());
+        plan.setUpdatedAt(Instant.now());
+        return plan;
     }
 }

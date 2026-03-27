@@ -1,9 +1,10 @@
 package com.resume.dashboard.service;
 
-import com.resume.dashboard.dto.auth.*;
+import com.resume.dashboard.dto.auth.AuthResponse;
+import com.resume.dashboard.dto.auth.LoginRequest;
+import com.resume.dashboard.dto.auth.RegisterRequest;
 import com.resume.dashboard.entity.PlanType;
 import com.resume.dashboard.entity.User;
-import com.resume.dashboard.exception.DuplicateEmailException;
 import com.resume.dashboard.exception.ResourceNotFoundException;
 import com.resume.dashboard.exception.UserBlockedException;
 import com.resume.dashboard.repository.UserRepository;
@@ -36,19 +37,13 @@ public class AuthService {
         this.subscriptionService = subscriptionService;
     }
 
-    /* =========================================================
-       SIGNUP (Username + Phone + Password)
-    ========================================================= */
     public AuthResponse signup(RegisterRequest request) {
-
         if (request.getUsername() == null || request.getUsername().isBlank()) {
             throw new IllegalArgumentException("Username required");
         }
-
         if (request.getPhoneNumber() == null || request.getPhoneNumber().isBlank()) {
             throw new IllegalArgumentException("Phone number required");
         }
-
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match");
         }
@@ -56,16 +51,12 @@ public class AuthService {
         String username = request.getUsername().trim().toLowerCase();
         String phone = request.getPhoneNumber().trim();
 
-        // Username validation
         if (!username.matches("^[a-z0-9]{3,20}$")) {
-            throw new IllegalArgumentException(
-                    "Username must be 3-20 lowercase letters or numbers");
+            throw new IllegalArgumentException("Username must be 3-20 lowercase letters or numbers");
         }
-
         if (userRepository.existsByUsername(username)) {
             throw new IllegalStateException("Username already taken");
         }
-
         if (userRepository.existsByPhoneNumber(phone)) {
             throw new IllegalStateException("Phone already registered");
         }
@@ -77,40 +68,25 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("ROLE_USER");
         user.setStatus(User.UserStatus.ACTIVE);
+        user.setFreePlanConsumed(false);
+        user.setFreePlanConsumedAt(null);
         user.setCreatedAt(Instant.now());
         user.setLastLogin(Instant.now());
 
         User saved = userRepository.save(user);
-
-        subscriptionService.createSubscription(
-                saved.getId(),
-                PlanType.FREE,
-                null
-        );
+        subscriptionService.createSubscription(saved.getId(), PlanType.FREE, null);
         log.info("User registered: {}", saved.getId());
 
         String token = jwtUtil.generateToken(saved.getUsername(), saved.getId());
-
-        return new AuthResponse(
-                token,
-                saved.getRole(),
-                saved.getUsername(),
-                saved.getPhoneNumber(),
-                saved.getId()
-        );
+        return new AuthResponse(token, saved.getRole(), saved.getUsername(), saved.getPhoneNumber(), saved.getId());
     }
 
-    /* =========================================================
-       LOGIN (Username OR Phone)
-    ========================================================= */
     public AuthResponse login(LoginRequest request) {
-
         if (request.getIdentifier() == null || request.getIdentifier().isBlank()) {
             throw new IllegalArgumentException("Username or phone required");
         }
 
         String identifier = request.getIdentifier().trim().toLowerCase();
-
         User user = userRepository.findByUsername(identifier)
                 .or(() -> userRepository.findByPhoneNumber(identifier))
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
@@ -118,7 +94,6 @@ public class AuthService {
         if (user.getStatus() == User.UserStatus.BLOCKED) {
             throw new UserBlockedException("Account blocked");
         }
-
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ResourceNotFoundException("Invalid credentials");
         }
@@ -127,16 +102,9 @@ public class AuthService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getId());
-
         log.info("User logged in: {}", user.getId());
 
-        return new AuthResponse(
-                token,
-                user.getRole(),
-                user.getUsername(),
-                user.getPhoneNumber(),
-                user.getId()
-        );
+        return new AuthResponse(token, user.getRole(), user.getUsername(), user.getPhoneNumber(), user.getId());
     }
 
     public User getUserById(String userId) {

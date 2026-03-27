@@ -1,6 +1,9 @@
 package com.resume.dashboard.service.admin;
 
-import com.resume.dashboard.entity.*;
+import com.resume.dashboard.entity.ApprovalStatus;
+import com.resume.dashboard.entity.Resume;
+import com.resume.dashboard.entity.User;
+import com.resume.dashboard.entity.VisibilityType;
 import com.resume.dashboard.exception.ResourceNotFoundException;
 import com.resume.dashboard.repository.ResumeRepository;
 import com.resume.dashboard.repository.UserRepository;
@@ -26,9 +29,6 @@ public class AdminService {
         this.userRepository = userRepository;
     }
 
-    /* =========================================================
-       GET ALL
-    ========================================================= */
     public List<Resume> getAll() {
         return resumeRepository.findAll();
     }
@@ -41,59 +41,27 @@ public class AdminService {
         return resumeRepository.findByApprovalStatus(ApprovalStatus.PENDING);
     }
 
-    /* =========================================================
-       APPROVE + AUTO PUBLISH
-    ========================================================= */
     @Transactional
     public Resume approve(String resumeId) {
-
         Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Resume not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         if (resume.getApprovalStatus() != ApprovalStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Only PENDING resumes can be approved");
+            throw new IllegalStateException("Only PENDING resumes can be approved");
         }
 
-        // 1️⃣ Set Approved
         resume.setApprovalStatus(ApprovalStatus.APPROVED);
 
-        // 2️⃣ Snapshot version before publish (if plan allows)
         try {
             resumeVersionService.createVersion(
                     resume.getUserId(),
                     resume.getId(),
                     "Auto snapshot on admin approval"
             );
-        } catch (RuntimeException e) {
-            // Ignore if user's plan doesn't support versioning
+        } catch (RuntimeException ignored) {
         }
 
-        // 3️⃣ Generate slug
-        User user = userRepository.findById(resume.getUserId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
-
-        long publishedCount =
-                resumeRepository.countByUserIdAndPublishedTrue(user.getId());
-
-        String baseSlug = user.getUsername().toLowerCase();
-        String finalSlug;
-
-        if (publishedCount == 0) {
-            finalSlug = baseSlug;
-        } else {
-            finalSlug = baseSlug + "-v" + (publishedCount + 1);
-        }
-
-        int counter = (int) publishedCount + 1;
-        while (resumeRepository.existsBySlug(finalSlug)) {
-            counter++;
-            finalSlug = baseSlug + "-v" + counter;
-        }
-
-        // 4️⃣ Auto Publish
+        String finalSlug = resolveApprovedSlug(resume);
         resume.setSlug(finalSlug);
         resume.setPublished(true);
         resume.setVisibility(VisibilityType.PUBLIC);
@@ -102,18 +70,12 @@ public class AdminService {
         return resumeRepository.save(resume);
     }
 
-    /* =========================================================
-       REJECT
-    ========================================================= */
     public Resume reject(String resumeId) {
-
         Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Resume not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         if (resume.getApprovalStatus() != ApprovalStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Only PENDING resumes can be rejected");
+            throw new IllegalStateException("Only PENDING resumes can be rejected");
         }
 
         resume.setApprovalStatus(ApprovalStatus.REJECTED);
@@ -125,14 +87,9 @@ public class AdminService {
         return resumeRepository.save(resume);
     }
 
-    /* =========================================================
-       FORCE UNPUBLISH
-    ========================================================= */
     public Resume forceUnpublish(String resumeId) {
-
         Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Resume not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         resume.setPublished(false);
         resume.setVisibility(VisibilityType.PRIVATE);
@@ -142,15 +99,61 @@ public class AdminService {
         return resumeRepository.save(resume);
     }
 
-    /* =========================================================
-       DELETE
-    ========================================================= */
-    public void delete(String resumeId) {
-
+    public Resume updateSlug(String resumeId, String requestedSlug) {
         Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Resume not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
+
+        String slug = normalizeSlugCandidate(requestedSlug);
+        if (slug.length() < 3 || slug.length() > 40) {
+            throw new IllegalArgumentException("Public URL must be between 3 and 40 characters.");
+        }
+        if (resumeRepository.existsBySlugAndIdNot(slug, resumeId)) {
+            throw new IllegalStateException("This public URL is already taken.");
+        }
+
+        resume.setSlug(slug);
+        resume.setUpdatedAt(Instant.now());
+        return resumeRepository.save(resume);
+    }
+
+    public void delete(String resumeId) {
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         resumeRepository.delete(resume);
+    }
+
+    private String resolveApprovedSlug(Resume resume) {
+        String existing = normalizeSlugCandidate(resume.getSlug());
+        if (!existing.isBlank()) {
+            if (resumeRepository.existsBySlugAndIdNot(existing, resume.getId())) {
+                throw new IllegalStateException("This public URL is already taken.");
+            }
+            return existing;
+        }
+
+        User user = userRepository.findById(resume.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        long publishedCount = resumeRepository.countByUserIdAndPublishedTrue(user.getId());
+        String baseSlug = normalizeSlugCandidate(user.getUsername());
+        String finalSlug = publishedCount == 0 ? baseSlug : baseSlug + "-v" + (publishedCount + 1);
+
+        int counter = (int) publishedCount + 1;
+        while (resumeRepository.existsBySlugAndIdNot(finalSlug, resume.getId())) {
+            counter++;
+            finalSlug = baseSlug + "-v" + counter;
+        }
+        return finalSlug;
+    }
+
+    private String normalizeSlugCandidate(String slug) {
+        if (slug == null) {
+            return "";
+        }
+        return slug.trim().toLowerCase()
+                .replaceAll("[^a-z0-9-]", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
     }
 }

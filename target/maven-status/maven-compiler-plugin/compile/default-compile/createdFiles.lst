@@ -11,6 +11,7 @@ com\resume\dashboard\repository\PublicationRepository.class
 com\resume\dashboard\dto\template\CreateTemplateRequest.class
 com\resume\dashboard\service\publicview\section\SkillSectionHandler.class
 com\resume\dashboard\dto\publicview\PublicFinancialCredentialDTO.class
+com\resume\dashboard\controller\admin\AdminController$UpdateSlugRequest.class
 com\resume\dashboard\entity\ContactStatus.class
 com\resume\dashboard\dto\auth\ChangePasswordRequest.class
 com\resume\dashboard\service\publicview\section\PublicationSectionHandler.class
@@ -45,7 +46,6 @@ com\resume\dashboard\entity\Role.class
 com\resume\dashboard\entity\AnalyticsEvent.class
 com\resume\dashboard\repository\ThemeRepository.class
 com\resume\dashboard\service\ThemeService.class
-com\resume\dashboard\service\ResumeService.class
 com\resume\dashboard\dto\layout\CreateLayoutRequest.class
 com\resume\dashboard\service\admin\AdminService.class
 com\resume\dashboard\controller\PublicationController.class
@@ -58,11 +58,9 @@ com\resume\dashboard\config\SecurityConfig.class
 com\resume\dashboard\controller\ThemeController.class
 com\resume\dashboard\entity\MediaAppearance.class
 com\resume\dashboard\security\JwtAuthEntryPoint.class
-com\resume\dashboard\controller\ResumeController$ChangeThemeRequest.class
 com\resume\dashboard\service\CloudinaryService$CloudinaryUploadResult.class
 com\resume\dashboard\dto\publicview\PublicTestimonialDTO.class
 com\resume\dashboard\entity\BlogPost.class
-com\resume\dashboard\controller\ResumeController$UpdateMetaRequest.class
 com\resume\dashboard\entity\User.class
 com\resume\dashboard\dto\experience\UpdateExperienceRequest.class
 com\resume\dashboard\entity\PaymentOrder.class
@@ -161,7 +159,6 @@ com\resume\dashboard\dto\layout\LayoutResponse.class
 com\resume\dashboard\entity\AwardType.class
 com\resume\dashboard\entity\PortfolioSectionType.class
 com\resume\dashboard\service\UserProfileService.class
-com\resume\dashboard\controller\ResumeController.class
 com\resume\dashboard\dto\testimonial\PublicTestimonialResponse.class
 com\resume\dashboard\entity\PlanType.class
 com\resume\dashboard\entity\ThemeBackground$GradientStop.class
@@ -232,7 +229,6 @@ com\resume\dashboard\controller\admin\AdminUploadController.class
 com\resume\dashboard\dto\service\UpdateServiceOfferingRequest.class
 com\resume\dashboard\exception\ResourceNotFoundException.class
 com\resume\dashboard\repository\ProjectRepository.class
-com\resume\dashboard\controller\ResumeController$ChangeTemplateRequest.class
 com\resume\dashboard\dto\media\CreateMediaAppearanceRequest.class
 com\resume\dashboard\service\EducationService.class
 com\resume\dashboard\controller\CertificationController.class

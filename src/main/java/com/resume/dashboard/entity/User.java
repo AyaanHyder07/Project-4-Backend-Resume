@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+
 @Document(collection = "users")
 public class User {
 
@@ -12,7 +13,7 @@ public class User {
     private String id;
 
     @Indexed(unique = true)
-    private String username;   // THIS IS YOUR PUBLIC URL
+    private String username;
 
     @Indexed(unique = true, sparse = true)
     private String phoneNumber;
@@ -20,9 +21,11 @@ public class User {
     private String password;
 
     @Indexed
-    private String role; // ROLE_USER, ROLE_ADMIN
+    private String role;
 
     private UserStatus status;
+    private boolean freePlanConsumed;
+    private Instant freePlanConsumedAt;
 
     private Instant createdAt;
     private Instant lastLogin;
@@ -32,70 +35,33 @@ public class User {
         BLOCKED
     }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+    public UserStatus getStatus() { return status; }
+    public void setStatus(UserStatus status) { this.status = status; }
 
-	public String getPassword() {
-		return password;
-	}
+    public boolean isFreePlanConsumed() { return freePlanConsumed; }
+    public void setFreePlanConsumed(boolean freePlanConsumed) { this.freePlanConsumed = freePlanConsumed; }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public Instant getFreePlanConsumedAt() { return freePlanConsumedAt; }
+    public void setFreePlanConsumedAt(Instant freePlanConsumedAt) { this.freePlanConsumedAt = freePlanConsumedAt; }
 
-	public String getRole() {
-		return role;
-	}
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-	public void setRole(String role) {
-		this.role = role;
-	}
-
-	public UserStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(UserStatus status) {
-		this.status = status;
-	}
-
-	public Instant getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Instant createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public Instant getLastLogin() {
-		return lastLogin;
-	}
-
-	public void setLastLogin(Instant lastLogin) {
-		this.lastLogin = lastLogin;
-	}
-    
+    public Instant getLastLogin() { return lastLogin; }
+    public void setLastLogin(Instant lastLogin) { this.lastLogin = lastLogin; }
 }
-
-
