@@ -19,6 +19,8 @@ public class PublicPortfolioResponse {
     private PublicThemeDataDTO themeData;
     private List<String> sectionOrder;
     private boolean openToWork;
+    private Map<String, String> templateOptions;
+    private Map<String, String> templateLabels;
 
     private TemplateMetaDTO templateMeta;
     private LayoutDTO layout;
@@ -50,6 +52,10 @@ public class PublicPortfolioResponse {
     public void setSectionOrder(List<String> sectionOrder) { this.sectionOrder = sectionOrder; }
     public boolean isOpenToWork() { return openToWork; }
     public void setOpenToWork(boolean openToWork) { this.openToWork = openToWork; }
+    public Map<String, String> getTemplateOptions() { return templateOptions; }
+    public void setTemplateOptions(Map<String, String> templateOptions) { this.templateOptions = templateOptions; }
+    public Map<String, String> getTemplateLabels() { return templateLabels; }
+    public void setTemplateLabels(Map<String, String> templateLabels) { this.templateLabels = templateLabels; }
     public TemplateMetaDTO getTemplateMeta() { return templateMeta; }
     public void setTemplateMeta(TemplateMetaDTO templateMeta) { this.templateMeta = templateMeta; }
     public LayoutDTO getLayout() { return layout; }

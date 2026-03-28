@@ -160,6 +160,7 @@ public class PaymentService {
         subscriptionService.createSubscription(
                 userId,
                 order.getTargetPlan(),
+                order.getBillingCycle(),
                 planEndDate
         );
 
@@ -174,3 +175,4 @@ public class PaymentService {
         return paymentOrderRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 }
+

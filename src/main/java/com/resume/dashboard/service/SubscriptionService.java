@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -159,7 +160,16 @@ public class SubscriptionService {
     }
 
     public PlanType getCurrentPlan(String userId) {
-        return getActiveSubscription(userId).getPlan();
+        try {
+            return getActiveSubscription(userId).getPlan();
+        } catch (RuntimeException ex) {
+            return subscriptionRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                    .stream()
+                    .map(Subscription::getPlan)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(PlanType.FREE);
+        }
     }
 
     public Subscription getSubscriptionDetails(String userId) {
@@ -199,7 +209,7 @@ public class SubscriptionService {
             active.setOneTimeOnly(planConfig.isOneTimeOnly());
             changed = true;
         }
-        if ((active.getTrialDurationDays() == null ? null : active.getTrialDurationDays()).equals(planConfig.getTrialDurationDays()) == false) {
+        if (!Objects.equals(active.getTrialDurationDays(), planConfig.getTrialDurationDays())) {
             active.setTrialDurationDays(planConfig.getTrialDurationDays());
             changed = true;
         }
@@ -258,3 +268,6 @@ public class SubscriptionService {
         return null;
     }
 }
+
+
+

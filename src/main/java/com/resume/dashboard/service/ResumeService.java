@@ -192,21 +192,40 @@ public class ResumeService {
 
         Template template = templateRepository.findByIdAndActiveTrue(newTemplateId)
                 .orElseThrow(() -> new ResourceNotFoundException("Template not found"));
-        Layout layout = layoutRepository.findById(template.getLayoutId())
-                .orElseThrow(() -> new ResourceNotFoundException("Layout not found"));
-        Theme theme = themeRepository.findById(template.getDefaultThemeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
+
+        Layout layout = null;
+        if (template.getLayoutId() != null && !template.getLayoutId().isBlank()) {
+            layout = layoutRepository.findById(template.getLayoutId()).orElse(null);
+        }
+        if (layout == null && resume.getLayoutId() != null && !resume.getLayoutId().isBlank()) {
+            layout = layoutRepository.findById(resume.getLayoutId()).orElse(null);
+        }
+
+        Theme theme = null;
+        if (template.getDefaultThemeId() != null && !template.getDefaultThemeId().isBlank()) {
+            theme = themeRepository.findById(template.getDefaultThemeId()).orElse(null);
+        }
+        if (theme == null && resume.getThemeId() != null && !resume.getThemeId().isBlank()) {
+            theme = themeRepository.findById(resume.getThemeId()).orElse(null);
+        }
+
         MotionPreset selectedMotion = template.getDefaultMotionPreset() != null
                 ? template.getDefaultMotionPreset()
-                : layout.getDefaultMotionPreset();
+                : layout != null
+                    ? layout.getDefaultMotionPreset()
+                    : resume.getMotionPreset();
 
         resume.setTemplateId(template.getId());
         resume.setTemplateKey(resolveTemplateKey(template, template.getTemplateKey()));
         resume.setTemplateVersion(template.getVersion());
-        resume.setLayoutId(layout.getId());
-        resume.setLayoutVersion(layout.getVersion());
-        resume.setThemeId(theme.getId());
-        resume.setThemeVersion(theme.getVersion());
+        if (layout != null) {
+            resume.setLayoutId(layout.getId());
+            resume.setLayoutVersion(layout.getVersion());
+        }
+        if (theme != null) {
+            resume.setThemeId(theme.getId());
+            resume.setThemeVersion(theme.getVersion());
+        }
         resume.setMotionPreset(selectedMotion);
         resume.setResolvedTheme(buildResolvedTheme(template, theme, selectedMotion));
         resume.setUpdatedAt(Instant.now());
@@ -300,13 +319,16 @@ public class ResumeService {
 
     private ResolvedTheme buildResolvedTheme(Template template, Theme theme, MotionPreset motionPreset) {
         TemplateDefaultTheme templateTheme = template != null ? template.getDefaultTheme() : null;
+        var palette = theme != null ? theme.getColorPalette() : null;
+        var typography = theme != null ? theme.getTypography() : null;
+        var effects = theme != null ? theme.getEffects() : null;
         ResolvedTheme value = new ResolvedTheme();
-        value.setPrimaryColor(templateTheme != null && templateTheme.getPrimaryColor() != null ? templateTheme.getPrimaryColor() : theme.getColorPalette() != null ? theme.getColorPalette().getPrimary() : null);
-        value.setAccentColor(templateTheme != null && templateTheme.getAccentColor() != null ? templateTheme.getAccentColor() : theme.getColorPalette() != null ? theme.getColorPalette().getAccent() : null);
-        value.setBackgroundColor(templateTheme != null && templateTheme.getBackgroundColor() != null ? templateTheme.getBackgroundColor() : theme.getColorPalette() != null ? theme.getColorPalette().getPageBackground() : null);
-        value.setTextColor(templateTheme != null && templateTheme.getTextColor() != null ? templateTheme.getTextColor() : theme.getColorPalette() != null ? theme.getColorPalette().getTextPrimary() : null);
-        value.setFontFamily(templateTheme != null && templateTheme.getFontFamily() != null ? templateTheme.getFontFamily() : theme.getTypography() != null ? (theme.getTypography().getBodyFont() != null ? theme.getTypography().getBodyFont() : theme.getTypography().getHeadingFont()) : null);
-        value.setBorderRadius(templateTheme != null && templateTheme.getBorderRadius() != null ? templateTheme.getBorderRadius() : mapBorderRadius(theme.getEffects()));
+        value.setPrimaryColor(templateTheme != null && templateTheme.getPrimaryColor() != null ? templateTheme.getPrimaryColor() : palette != null ? palette.getPrimary() : null);
+        value.setAccentColor(templateTheme != null && templateTheme.getAccentColor() != null ? templateTheme.getAccentColor() : palette != null ? palette.getAccent() : null);
+        value.setBackgroundColor(templateTheme != null && templateTheme.getBackgroundColor() != null ? templateTheme.getBackgroundColor() : palette != null ? palette.getPageBackground() : null);
+        value.setTextColor(templateTheme != null && templateTheme.getTextColor() != null ? templateTheme.getTextColor() : palette != null ? palette.getTextPrimary() : null);
+        value.setFontFamily(templateTheme != null && templateTheme.getFontFamily() != null ? templateTheme.getFontFamily() : typography != null ? (typography.getBodyFont() != null ? typography.getBodyFont() : typography.getHeadingFont()) : null);
+        value.setBorderRadius(templateTheme != null && templateTheme.getBorderRadius() != null ? templateTheme.getBorderRadius() : mapBorderRadius(effects));
         value.setMotionLevel(templateTheme != null && templateTheme.getMotionLevel() != null ? templateTheme.getMotionLevel() : mapMotionLevel(motionPreset));
         return value;
     }
@@ -352,6 +374,7 @@ public class ResumeService {
         return finalSlug;
     }
 }
+
 
 
 

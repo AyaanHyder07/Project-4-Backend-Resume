@@ -21,14 +21,15 @@ public class SubscriptionPlanSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (planRepository.count() > 0) {
-            return;
-        }
+        savePlan(buildPlan(PlanType.FREE, "Free Trial", "One portfolio draft for 7 days. Free can only be used once.", 0, 0, "?0", "?0", 1, 0, false, false, false, false, true, 7, false, true, 0));
+        savePlan(buildPlan(PlanType.BASIC, "Basic", "One portfolio, one public link, limited templates.", 19900, 199000, "?199/mo", "?1990/yr", 1, 1, false, false, false, false, false, null, false, true, 1));
+        savePlan(buildPlan(PlanType.PRO, "Pro", "Everything in Basic plus template switching and custom slugs.", 39900, 399000, "?399/mo", "?3990/yr", 1, 1, true, false, true, true, false, null, true, true, 2));
+        savePlan(buildPlan(PlanType.PREMIUM, "Premium", "Everything in Pro plus full public page customization.", 69900, 699000, "?699/mo", "?6990/yr", 1, 1, true, true, true, true, false, null, false, true, 3));
+    }
 
-        planRepository.save(buildPlan(PlanType.FREE, "Free Trial", "One portfolio draft for 7 days. Free can only be used once.", 0, 0, "?0", "?0", 1, 0, false, false, false, false, true, 7, false, true, 0));
-        planRepository.save(buildPlan(PlanType.BASIC, "Basic", "One portfolio, one public link, limited templates.", 19900, 199000, "?199/mo", "?1990/yr", 1, 1, false, false, false, false, false, null, false, true, 1));
-        planRepository.save(buildPlan(PlanType.PRO, "Pro", "Everything in Basic plus template switching and custom slugs.", 39900, 399000, "?399/mo", "?3990/yr", 1, 1, true, false, true, true, false, null, true, true, 2));
-        planRepository.save(buildPlan(PlanType.PREMIUM, "Premium", "Everything in Pro plus full public page customization.", 69900, 699000, "?699/mo", "?6990/yr", 1, 1, true, true, true, true, false, null, false, true, 3));
+    private void savePlan(SubscriptionPlan plan) {
+        planRepository.findByPlanType(plan.getPlanType()).ifPresent(existing -> plan.setId(existing.getId()));
+        planRepository.save(plan);
     }
 
     private SubscriptionPlan buildPlan(PlanType planType, String displayName, String description, long priceMonthly, long priceYearly, String displayMonthly, String displayYearly, int resumeLimit, int publicLinkLimit, boolean versioning, boolean themeCustomization, boolean templateChange, boolean customSlugEnabled, boolean oneTimeOnly, Integer trialDurationDays, boolean isPopular, boolean isActive, int displayOrder) {

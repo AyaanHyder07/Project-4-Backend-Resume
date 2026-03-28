@@ -39,6 +39,7 @@ import com.resume.dashboard.repository.ResumeRepository;
 import com.resume.dashboard.repository.TemplateRepository;
 import com.resume.dashboard.repository.ThemeRepository;
 import com.resume.dashboard.repository.UserThemeCustomizationRepository;
+import com.resume.dashboard.service.SubscriptionService;
 import com.resume.dashboard.service.UserProfileService;
 import com.resume.dashboard.service.publicview.section.SectionHandler;
 import com.resume.dashboard.service.publicview.section.SectionHandlerRegistry;
@@ -95,6 +96,9 @@ public class PublicPortfolioAggregatorService {
         PublicUserProfileResponse profile = safePublicProfile(resume.getId());
         ResolvedThemeDTO resolvedTheme = resolveTheme(resume, baseTheme);
         PublicThemeDataDTO themeData = resolveThemeData(resume, template, baseTheme);
+        UserThemeCustomization customization = customizationRepository
+                .findByUserIdAndResumeId(resume.getUserId(), resume.getId())
+                .orElse(null);
 
         List<PortfolioSectionConfig> enabledSections = sectionConfigRepository
                 .findByResumeIdOrderByDisplayOrderAsc(resume.getId())
@@ -150,6 +154,8 @@ public class PublicPortfolioAggregatorService {
         response.setThemeData(themeData);
         response.setSectionOrder(sectionOrder);
         response.setOpenToWork(isOpenToWork(profile));
+        response.setTemplateOptions(customization != null ? customization.getTemplateOptions() : null);
+        response.setTemplateLabels(customization != null ? customization.getTemplateLabels() : null);
         response.setTemplateMeta(templateMeta);
         response.setLayout(layoutDTO);
         response.setTheme(resolvedTheme);
@@ -509,3 +515,6 @@ public class PublicPortfolioAggregatorService {
         return copy;
     }
 }
+
+
+

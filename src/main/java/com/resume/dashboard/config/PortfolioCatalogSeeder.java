@@ -51,13 +51,14 @@ public class PortfolioCatalogSeeder implements ApplicationRunner {
         boolean hasSystemTemplates = templateRepository.findAll().stream()
                 .anyMatch(template -> template.getTemplateKey() != null && !template.getTemplateKey().isBlank());
 
-        if (hasSystemTemplates) {
-            return;
-        }
-
         seedLayouts();
         seedThemes();
-        seedTemplates();
+
+        if (!hasSystemTemplates) {
+            seedTemplates();
+        }
+
+        seedExpandedTemplates();
     }
 
     private void seedLayouts() {
@@ -268,6 +269,55 @@ public class PortfolioCatalogSeeder implements ApplicationRunner {
                 "NONE", true, false, true, 79, 12));
     }
 
+    private void seedExpandedTemplates() {
+        List<String> universalSections = list("SKILLS", "EXPERIENCE", "PROJECTS", "EDUCATION", "CERTIFICATIONS", "PUBLICATIONS", "TESTIMONIALS", "SERVICES", "BLOG_POSTS", "EXHIBITIONS_AWARDS", "MEDIA_APPEARANCES", "FINANCIAL_CREDENTIALS", "CONTACT");
+
+        saveTemplateUpsert(template("WRITERSDESK", "WRITERSDESK", "core-editorial-flex", "GENERAL", "WritersDesk", "Editorial. Serif. Literary.", "An editorial surface that now flexes cleanly for writers, researchers, developers, consultants, and any enabled sections.", PlanType.FREE,
+                "system-layout-editorial", "system-theme-editorial", defaultTheme("#FFFDF7", "#92400E", "#FFFDF7", "#1C1917", "Playfair Display", "sm", "subtle"), VisualMood.EARTHY_ORGANIC,
+                List.of(LayoutAudience.WRITER, LayoutAudience.JOURNALIST, LayoutAudience.RESEARCHER, LayoutAudience.ENGINEER), List.of("editorial", "serif", "universal"),
+                List.of(ProfessionCategory.WRITING_PUBLISHING, ProfessionCategory.EDUCATION_RESEARCH, ProfessionCategory.TECH_ENGINEERING), List.of(ProfessionType.WRITER, ProfessionType.JOURNALIST, ProfessionType.CONTENT_STRATEGIST, ProfessionType.RESEARCHER, ProfessionType.SOFTWARE_ENGINEER, ProfessionType.DOCTOR),
+                List.of(ContentMode.STORY_FIRST, ContentMode.PORTFOLIO_FIRST, ContentMode.RESUME_FIRST), universalSections, list("BLOG_POSTS", "PUBLICATIONS", "PROJECTS", "EXPERIENCE", "CONTACT"), list("PROFILE"),
+                List.of(BlockType.RICH_TEXT, BlockType.QUOTE, BlockType.LINK_LIST, BlockType.TIMELINE, BlockType.CUSTOM_LIST), List.of(BlockType.RICH_TEXT, BlockType.TIMELINE, BlockType.QUOTE), List.of(MotionPreset.NONE, MotionPreset.SUBTLE, MotionPreset.EDITORIAL), MotionPreset.SUBTLE,
+                "TOP_MINIMAL", true, false, true, 89, 8));
+
+        saveTemplateUpsert(template("STUDIOGRID", "STUDIOGRID", "premium-dev-grid", "DEVELOPER", "StudioGrid", "Structured. Premium. Proof-led.", "A premium developer portfolio inspired by modern engineering portfolios with a strong first frame and flexible section rendering.", PlanType.PREMIUM,
+                "system-layout-devfolio", "system-theme-devfolio", defaultTheme("#081012", "#5BFFAA", "#081012", "#F0FFF8", "Space Grotesk", "md", "moderate"), VisualMood.FUTURISTIC_TECH,
+                List.of(LayoutAudience.SOFTWARE_ENGINEER, LayoutAudience.ENGINEER, LayoutAudience.PRODUCT_MANAGER), List.of("developer", "engineering", "proof-led"),
+                List.of(ProfessionCategory.TECH_ENGINEERING), List.of(ProfessionType.SOFTWARE_ENGINEER, ProfessionType.FRONTEND_DEVELOPER, ProfessionType.BACKEND_DEVELOPER, ProfessionType.FULL_STACK_DEVELOPER, ProfessionType.DATA_SCIENTIST),
+                List.of(ContentMode.RESUME_FIRST, ContentMode.PORTFOLIO_FIRST, ContentMode.STORY_FIRST), universalSections, list("EXPERIENCE", "PROJECTS", "SKILLS", "CERTIFICATIONS", "CONTACT"), list("PROFILE", "CONTACT"),
+                List.of(BlockType.TIMELINE, BlockType.METRICS, BlockType.CASE_STUDY, BlockType.CTA, BlockType.CUSTOM_LIST), List.of(BlockType.TIMELINE, BlockType.METRICS, BlockType.CTA), List.of(MotionPreset.SUBTLE, MotionPreset.CINEMATIC, MotionPreset.IMMERSIVE), MotionPreset.CINEMATIC,
+                "TOP_FIXED", true, true, true, 95, 13));
+
+        saveTemplateUpsert(template("PIXELMUSE", "PIXELMUSE", "premium-playful-creative", "CREATIVE", "PixelMuse", "Playful. Expressive. Magnetic.", "A playful creative portfolio for artists, designers, developers, and storytellers who want more personality on the first screen.", PlanType.PREMIUM,
+                "system-layout-editorial", "system-theme-editorial", defaultTheme("#FFF6EF", "#D6007A", "#FFF6EF", "#19120F", "Syne", "lg", "moderate"), VisualMood.ARTISTIC_EXPRESSIVE,
+                List.of(LayoutAudience.UX_DESIGNER, LayoutAudience.ILLUSTRATOR, LayoutAudience.ARTIST, LayoutAudience.ENGINEER), List.of("creative", "playful", "artist"),
+                List.of(ProfessionCategory.DESIGN_CREATIVE, ProfessionCategory.ARTIST_ILLUSTRATION, ProfessionCategory.TECH_ENGINEERING), List.of(ProfessionType.UI_DESIGNER, ProfessionType.GRAPHIC_DESIGNER, ProfessionType.ILLUSTRATOR, ProfessionType.VISUAL_ARTIST, ProfessionType.SOFTWARE_ENGINEER),
+                List.of(ContentMode.PORTFOLIO_FIRST, ContentMode.STORY_FIRST, ContentMode.RESUME_FIRST), universalSections, list("PROJECTS", "BLOG_POSTS", "EXPERIENCE", "SERVICES", "CONTACT"), list("PROFILE"),
+                List.of(BlockType.CASE_STUDY, BlockType.GALLERY, BlockType.QUOTE, BlockType.CUSTOM_LIST), List.of(BlockType.CASE_STUDY, BlockType.GALLERY, BlockType.QUOTE), List.of(MotionPreset.SUBTLE, MotionPreset.EDITORIAL, MotionPreset.IMMERSIVE), MotionPreset.EDITORIAL,
+                "NONE", true, true, true, 92, 14));
+
+        saveTemplateUpsert(template("CREATORFRAME", "CREATORFRAME", "premium-social-frame", "CREATOR", "CreatorFrame", "Framed. Social. Identity-first.", "A one-frame creator portfolio that places 60-70% of the identity and trust signals in the first screen, then unfolds the rest below.", PlanType.PREMIUM,
+                "system-layout-editorial", "system-theme-editorial", defaultTheme("#151518", "#FF00A8", "#151518", "#F6F1F7", "Outfit", "lg", "moderate"), VisualMood.BOLD_VIBRANT,
+                List.of(LayoutAudience.SPEAKER, LayoutAudience.CONSULTANT, LayoutAudience.ARTIST, LayoutAudience.ENGINEER), List.of("creator", "social", "profile"),
+                List.of(ProfessionCategory.MEDIA_ENTERTAINMENT, ProfessionCategory.DESIGN_CREATIVE, ProfessionCategory.CONSULTING_COACHING, ProfessionCategory.TECH_ENGINEERING), List.of(ProfessionType.MUSICIAN, ProfessionType.MARKETING_SPECIALIST, ProfessionType.BUSINESS_CONSULTANT, ProfessionType.SOFTWARE_ENGINEER, ProfessionType.GRAPHIC_DESIGNER),
+                List.of(ContentMode.STORY_FIRST, ContentMode.PORTFOLIO_FIRST, ContentMode.SERVICE_FIRST), universalSections, list("PROJECTS", "BLOG_POSTS", "SERVICES", "TESTIMONIALS", "CONTACT"), list("PROFILE", "CONTACT"),
+                List.of(BlockType.CUSTOM_LIST, BlockType.QUOTE, BlockType.CTA, BlockType.CASE_STUDY), List.of(BlockType.CUSTOM_LIST, BlockType.QUOTE, BlockType.CTA), List.of(MotionPreset.SUBTLE, MotionPreset.CINEMATIC, MotionPreset.IMMERSIVE), MotionPreset.SUBTLE,
+                "NONE", true, true, true, 91, 15));
+
+        saveTemplateUpsert(template("QUIETCANVAS", "QUIETCANVAS", "premium-minimal-calm", "GENERAL", "QuietCanvas", "Minimal. Aesthetic. Calm.", "A simple, no-navbar premium portfolio that gives most of the story to the first screen and lets every enabled section breathe below.", PlanType.PREMIUM,
+                "system-layout-editorial", "system-theme-editorial", defaultTheme("#FAF4EC", "#8F5B3E", "#FAF4EC", "#171311", "Cormorant Garamond", "none", "subtle"), VisualMood.EARTHY_ORGANIC,
+                List.of(LayoutAudience.WRITER, LayoutAudience.EXECUTIVE, LayoutAudience.CONSULTANT, LayoutAudience.DOCTOR, LayoutAudience.ENGINEER), List.of("minimal", "aesthetic", "calm"),
+                List.of(ProfessionCategory.PROFESSIONAL_CORPORATE, ProfessionCategory.CONSULTING_COACHING, ProfessionCategory.HEALTHCARE_MEDICAL, ProfessionCategory.DESIGN_CREATIVE, ProfessionCategory.TECH_ENGINEERING), List.of(ProfessionType.GENERALIST, ProfessionType.DOCTOR, ProfessionType.BUSINESS_CONSULTANT, ProfessionType.SOFTWARE_ENGINEER, ProfessionType.WRITER),
+                List.of(ContentMode.STORY_FIRST, ContentMode.RESUME_FIRST, ContentMode.PORTFOLIO_FIRST), universalSections, list("PROJECTS", "EXPERIENCE", "PUBLICATIONS", "SERVICES", "CONTACT"), list("PROFILE"),
+                List.of(BlockType.RICH_TEXT, BlockType.CUSTOM_LIST, BlockType.QUOTE, BlockType.TIMELINE), List.of(BlockType.RICH_TEXT, BlockType.QUOTE), List.of(MotionPreset.NONE, MotionPreset.SUBTLE, MotionPreset.EDITORIAL), MotionPreset.NONE,
+                "NONE", true, true, true, 90, 16));
+    }
+
+    private void saveTemplateUpsert(Template template) {
+        templateRepository.findByTemplateKeyIgnoreCaseAndActiveTrue(template.getTemplateKey())
+                .ifPresent(existing -> template.setId(existing.getId()));
+        templateRepository.save(template);
+    }
     private Layout layout(String id, String name, String description, LayoutType layoutType, PlanType requiredPlan,
                           MotionPreset defaultMotionPreset, List<LayoutAudience> targetAudiences,
                           List<ProfessionCategory> supportedCategories, List<ProfessionType> supportedTypes,
@@ -485,3 +535,6 @@ public class PortfolioCatalogSeeder implements ApplicationRunner {
         return List.of(values);
     }
 }
+
+
+

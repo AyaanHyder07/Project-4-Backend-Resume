@@ -103,6 +103,12 @@ public class UserThemeCustomizationService {
         if (request.getCardBorderRadius() != null)
             custom.setCardBorderRadius(request.getCardBorderRadius());
 
+        if (request.getTemplateOptions() != null)
+            custom.setTemplateOptions(request.getTemplateOptions());
+
+        if (request.getTemplateLabels() != null)
+            custom.setTemplateLabels(request.getTemplateLabels());
+
         custom.setUpdatedAt(Instant.now());
 
         return mapToCustomizationResponse(customizationRepository.save(custom));
@@ -294,6 +300,8 @@ public class UserThemeCustomizationService {
         r.setEnableGrain(c.getEnableGrain());
         r.setGrainIntensity(c.getGrainIntensity());
         r.setCardBorderRadius(c.getCardBorderRadius());
+        r.setTemplateOptions(c.getTemplateOptions());
+        r.setTemplateLabels(c.getTemplateLabels());
         r.setCreatedAt(c.getCreatedAt());
         r.setUpdatedAt(c.getUpdatedAt());
         return r;
